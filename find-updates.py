@@ -110,11 +110,11 @@ def main():
     for name in new:
         message = "New Job! ⭐️: %s" % new
         data = {"text": message}
+        print(data)
         response = requests.post(webhook, headers=headers, data=data)
-
         if response.status_code not in [200, 201]:
             print(response)
-            sys.exit("Issue with making POST request: %s" % response.reason)
+            sys.exit("Issue with making POST request: %s, %s" % (response.reason, response.status_code))
 
     print("::set-output name=fields::%s" % list(new))
 
