@@ -41,13 +41,16 @@ and put it in a safe place. We will want to keep this URL as a secret in our eve
 
 ## 2. Usage
 
-Add an GitHub workflow file in .github/workflows to specify the following:
+Add an GitHub workflow file in .github/workflows to specify the following. Note that
+the workflow below will do the check and update on the opening of a pull request.
 
 ```yaml
 on:
   pull_request:
     paths:
       - '_data/jobs.yml'
+    types:
+      - opened
     branches:
       - main
 

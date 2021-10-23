@@ -8,6 +8,7 @@
 import argparse
 from datetime import datetime
 import requests
+import random
 import logging
 import os
 import sys
@@ -97,24 +98,23 @@ def main():
         print("::set-output name=fields::[]")
         sys.exit(0)
 
-    # Format into slack message
-    message = [" - %s" % name for name in new]
-    word = "Jobs!"
-    if new == 1:
-        word = "Job!"
-    message = "New %s ⭐️\n" % word + "\n".join(message)
-
     # Prepare the data
     webhook = os.environ.get("SLACK_WEBHOOK")
     if not webhook:
         sys.exit("Cannot find SLACK_WEBHOOK in environment.")
-    headers = {"Content-type": "application/json"}
-    data = {"text": message}
-    response = requests.post(webhook, headers=headers, data=data)
 
-    if response.status_code not in [200, 201]:
-        print(response)
-        sys.exit("Issue with making POST request: %s" % response.reason)
+    headers = {"Content-type": "application/json"}
+
+    # Format into slack messages
+    icons = ["⭐️", "😍️", "❤️", "👀️", "✨️"]
+    for name in new:
+        message = "New Job! ⭐️: %s" % new
+        data = {"text": message}
+        response = requests.post(webhook, headers=headers, data=data)
+
+        if response.status_code not in [200, 201]:
+            print(response)
+            sys.exit("Issue with making POST request: %s" % response.reason)
 
     print("::set-output name=fields::%s" % list(new))
 
