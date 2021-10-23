@@ -15,8 +15,9 @@ import yaml
 
 logging.basicConfig(level=logging.INFO)
 
+
 def read_yaml(filename):
-    with open(filename, 'r') as stream:
+    with open(filename, "r") as stream:
         content = yaml.load(stream, Loader=yaml.FullLoader)
     return content
 
@@ -27,9 +28,7 @@ def write_file(content, filename):
 
 
 def get_parser():
-    parser = argparse.ArgumentParser(
-        description="Job Updater"
-    )
+    parser = argparse.ArgumentParser(description="Job Updater")
 
     description = "Find new jobs in a yaml"
     subparsers = parser.add_subparsers(
@@ -47,14 +46,14 @@ def get_parser():
         help="the original file",
     )
 
-    updated.add_argument(
+    update.add_argument(
         "--updated",
         "-u",
         dest="updated",
         help="The updated file",
     )
 
-    updated.add_argument(
+    update.add_argument(
         "--key",
         dest="key",
         help="The key to post to slack",
@@ -81,7 +80,7 @@ def main():
 
     original = read_yaml(args.original)
     updated = read_yaml(args.updated)
-        
+
     # Find new posts in updated
     previous = set()
     new = set()
@@ -103,7 +102,7 @@ def main():
     word = "Jobs!"
     if new == 1:
         word = "Job!"
-    message = "New %s ⭐️\n" % word + "\n".join(message) 
+    message = "New %s ⭐️\n" % word + "\n".join(message)
 
     # Prepare the data
     webhook = os.environ.get("SLACK_WEBHOOK")
@@ -115,9 +114,10 @@ def main():
 
     if response.status_code not in [200, 201]:
         print(response)
-        sys.exit("Issue with making POST request: %s" % response.reason)    
-      
+        sys.exit("Issue with making POST request: %s" % response.reason)
+
     print("::set-output name=fields::%s" % list(new))
+
 
 if __name__ == "__main__":
     main()
