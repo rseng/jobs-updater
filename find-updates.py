@@ -107,7 +107,7 @@ def main():
     icons = ["⭐️", "😍️", "❤️", "👀️", "✨️", "🤖️", "💼️"]
     for name in new:
         choice = random.choice(icons)
-        message = '"New Job! %s: %s"' % (choice, name)
+        message = 'New Job! %s: %s' % (choice, name)
         data = {"text": message}
         print(data)
         response = requests.post(webhook, headers=headers, data=json.dumps(data))
