@@ -21,4 +21,5 @@ jobs:
           key: "url"
           
       - run: echo ${{ steps.updater.outputs.fields }}
-        shell: bash
+        name: Show New Jobs
+        shell: bash        

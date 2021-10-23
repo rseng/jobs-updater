@@ -109,7 +109,8 @@ def main():
     # Format into slack messages
     icons = ["⭐️", "😍️", "❤️", "👀️", "✨️"]
     for name in new:
-        message = '"New Job! ⭐️: %s"' % name
+        choice = random.choice(icons)
+        message = '"New Job! %s: %s"' % (choice, name)
         data = {"text": message}
         print(data)
         response = requests.post(webhook, headers=headers, data=json.dumps(data))

@@ -70,6 +70,7 @@ jobs:
           key: "url"
           
       - run: echo ${{ steps.updater.outputs.fields }}
+        name: Show New Jobs
         shell: bash
 ```
 
