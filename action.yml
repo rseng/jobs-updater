@@ -31,5 +31,6 @@ runs:
         INPUT_MAIN: ${{ inputs.main }}
         INPUT_KEY: ${{ inputs.key }}
         ACTION_DIR: ${{ github.action_path }}
+        INPUT_REPO: ${{ github.repository }}
       run: ${{ github.action_path }}/entrypoint.sh
       shell: bash

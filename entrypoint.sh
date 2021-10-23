@@ -12,7 +12,7 @@ if [[ ! -f "${INPUT_FILENAME}" ]]; then
 fi
 
 # Wget the comparison file
-JOBFILE="https://raw.githubusercontent.com/${{ github.repository }}/${INPUT_MAIN}/${INPUT_FILENAME}"
+JOBFILE="https://raw.githubusercontent.com/${INPUT_REPO}/${INPUT_MAIN}/${INPUT_FILENAME}"
 TMP=$(mktemp -d)
 
 wget ${JOBFILE} -O "${TMP}/${INPUT_FILENAME}"
