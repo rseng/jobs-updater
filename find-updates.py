@@ -10,6 +10,7 @@ from datetime import datetime
 import requests
 import random
 import logging
+import json
 import os
 import sys
 import yaml
@@ -111,7 +112,7 @@ def main():
         message = '"New Job! ⭐️: %s"' % name
         data = {"text": message}
         print(data)
-        response = requests.post(webhook, headers=headers, data=data)
+        response = requests.post(webhook, headers=headers, data=json.dumps(data))
         if response.status_code not in [200, 201]:
             print(response)
             sys.exit("Issue with making POST request: %s, %s" % (response.reason, response.status_code))
