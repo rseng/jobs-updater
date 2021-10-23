@@ -9,13 +9,10 @@ import argparse
 from datetime import datetime
 import requests
 import random
-import logging
 import json
 import os
 import sys
 import yaml
-
-logging.basicConfig(level=logging.INFO)
 
 
 def read_yaml(filename):
@@ -107,7 +104,7 @@ def main():
     headers = {"Content-type": "application/json"}
 
     # Format into slack messages
-    icons = ["⭐️", "😍️", "❤️", "👀️", "✨️"]
+    icons = ["⭐️", "😍️", "❤️", "👀️", "✨️", "🤖️", "💼️"]
     for name in new:
         choice = random.choice(icons)
         message = '"New Job! %s: %s"' % (choice, name)
@@ -116,7 +113,10 @@ def main():
         response = requests.post(webhook, headers=headers, data=json.dumps(data))
         if response.status_code not in [200, 201]:
             print(response)
-            sys.exit("Issue with making POST request: %s, %s" % (response.reason, response.status_code))
+            sys.exit(
+                "Issue with making POST request: %s, %s"
+                % (response.reason, response.status_code)
+            )
 
     print("::set-output name=fields::%s" % list(new))
 
