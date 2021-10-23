@@ -9,8 +9,11 @@ and a yaml file with a list of jobs (or other links):
   url: https://my-job.org/12345
 ```
 
-The action will inspect the file to determine lines that are newly added,
-given a field of interest, extract this field, and then post to a Slack channel.
+The action will inspect the file to determine lines that are newly added (compared to the main branch)
+for a field of interest (e.g., the "url" attribute in a list of jobs), extract this field, and then post to a Slack channel.
+
+![img/example.png](img/example.png)
+
 This is custom made to help the [US-RSE](https://github.com/US-RSE/usrse.github.io) site
 to have job updates posted to slack!
 
