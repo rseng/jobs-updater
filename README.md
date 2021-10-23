@@ -69,7 +69,8 @@ jobs:
           done
 
       - id: updater
-        if: ${{ steps.checker.outputs.jobs_updated == 'true' }}
+        name: Job Updater
+        if: ${{ steps.checker.outputs.jobs_updated == true }}
         uses: rseng/job-updater@main
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
