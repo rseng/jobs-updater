@@ -45,7 +45,11 @@ Add an GitHub workflow file in .github/workflows to specify the following:
 
 ```yaml
 on:
- - pull_request: []
+  pull_request:
+    paths:
+      - '_data/jobs.yml'
+    branches:
+      - main
 
 jobs:
   slack-poster:
@@ -53,29 +57,13 @@ jobs:
     name: Run Jobs Slack Poster
     steps:
       - uses: actions/checkout@v2
-
-      - id: changed-files
-        uses: jitterbit/get-changed-files@d06c756e3609dd3dd5d302dde8d1339af3f790f2
-      - name: Check if Jobs Updated
-        id: checker
-        run: |
-          echo "::set-output name=jobs_updated::false"
-          for changed_file in ${{ steps.files.outputs.added_modified }}; do
-              printf "Checking changed file ${changed_file}\n"
-              if [[ "${changed_file}" == "_data/jobs.yml" ]]; then
-                  printf "Found changed jobs!\n"
-                  echo "::set-output name=jobs_updated::true"
-              fi
-          done
-
       - id: updater
         name: Job Updater
-        if: ${{ steps.checker.outputs.jobs_updated == true }}
-        uses: rseng/job-updater@main
+        uses: rseng/jobs-updater@main
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         with:        
-          filename: "examples/jobs.yaml"
+          filename: "_data/jobs.yml"
           key: "url"
           
       - run: echo ${{ steps.updater.outputs.fields }}
