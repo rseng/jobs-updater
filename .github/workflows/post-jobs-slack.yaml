@@ -11,6 +11,9 @@ jobs:
     name: Run Jobs Slack Poster
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
+
       - id: updater
         name: Job Updater
         uses: ./
