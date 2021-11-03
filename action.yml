@@ -1,10 +1,6 @@
 name: 'Jobs Updater'
 description: "The jobs updater will respond on some trigger, and them parse a jobs file for changes, posting a field of interest to slack."
 inputs:
-  main: 
-    description: main branch to compare to (defaults to main)
-    required: false
-    default: main
   filename:
     description: the filename for the jobs
     required: true    
@@ -28,8 +24,8 @@ runs:
       id: jobs-updater
       env:
         INPUT_FILENAME: ${{ inputs.filename }}
-        INPUT_MAIN: ${{ inputs.main }}
         INPUT_KEY: ${{ inputs.key }}
+        CURRENT_SHA: ${{ github.sha }}
         ACTION_DIR: ${{ github.action_path }}
         INPUT_REPO: ${{ github.repository }}
       run: ${{ github.action_path }}/entrypoint.sh

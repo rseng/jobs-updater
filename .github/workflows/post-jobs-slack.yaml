@@ -1,5 +1,5 @@
 on:
-  pull_request:
+  push:
     paths:
       - 'example/jobs.yaml'
     branches:
@@ -11,15 +11,18 @@ jobs:
     name: Run Jobs Slack Poster
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
+
       - id: updater
         name: Job Updater
         uses: ./
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-        with:        
+        with:
           filename: "example/jobs.yaml"
           key: "url"
-          
+
       - run: echo ${{ steps.updater.outputs.fields }}
         name: Show New Jobs
-        shell: bash        
+        shell: bash

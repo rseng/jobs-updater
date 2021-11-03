@@ -9,7 +9,7 @@ and a yaml file with a list of jobs (or other links):
   url: https://my-job.org/12345
 ```
 
-The action will inspect the file to determine lines that are newly added (compared to the main branch)
+The action will inspect the file to determine lines that are newly added (compared to the parent commit)
 for a field of interest (e.g., the "url" attribute in a list of jobs), extract this field, and then post to a Slack channel.
 
 ![img/example.png](img/example.png)
@@ -44,16 +44,14 @@ and put it in a safe place. We will want to keep this URL as a secret in our eve
 
 ## 2. Usage
 
-Add an GitHub workflow file in .github/workflows to specify the following. Note that
-the workflow below will do the check and update on the opening of a pull request.
+Add an GitHub workflow file in `.github/workflows` to specify the following. Note that
+the workflow below will do the check and update on any push to main (e.g., a merged pull request).
 
 ```yaml
 on:
-  pull_request:
+  push:
     paths:
       - '_data/jobs.yml'
-    types:
-      - opened
     branches:
       - main
 
@@ -63,17 +61,19 @@ jobs:
     name: Run Jobs Slack Poster
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
+
       - id: updater
         name: Job Updater
         uses: rseng/jobs-updater@main
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-        with:        
+        with:
           filename: "_data/jobs.yml"
           key: "url"
-          
+
       - run: echo ${{ steps.updater.outputs.fields }}
         name: Show New Jobs
         shell: bash
 ```
-
