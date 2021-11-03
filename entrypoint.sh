@@ -12,7 +12,8 @@ if [[ ! -f "${INPUT_FILENAME}" ]]; then
 fi
 
 # Wget the comparison file
-JOBFILE="https://raw.githubusercontent.com/${INPUT_REPO}/${INPUT_MAIN}/${INPUT_FILENAME}"
+PARENT_SHA=$(git log --pretty=%P -n 1 ${CURRENT_SHA} | cut -d ' ' -f 1)
+JOBFILE="https://raw.githubusercontent.com/${INPUT_REPO}/${PARENT_SHA}/${INPUT_FILENAME}"
 TMP=$(mktemp -d)
 
 BASENAME=$(basename ${INPUT_FILENAME})
