@@ -108,7 +108,7 @@ def main():
     for name in new:
         choice = random.choice(icons)
         message = 'New Job! %s: %s' % (choice, name)
-        data = {"text": message}
+        data = {"text": message, "unfurl_links": True}
         print(data)
         response = requests.post(webhook, headers=headers, data=json.dumps(data))
         if response.status_code not in [200, 201]:
