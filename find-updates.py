@@ -46,6 +46,15 @@ def get_parser():
     )
 
     update.add_argument(
+        "--deploy",
+        "-d",
+        dest="deploy",
+        action="store_true",
+        default=False,
+        help="deploy to Slack",
+    )
+
+    update.add_argument(
         "--updated",
         "-u",
         dest="updated",
@@ -98,18 +107,38 @@ def main():
 
     # Prepare the data
     webhook = os.environ.get("SLACK_WEBHOOK")
-    if not webhook:
+    if not webhook and args.deploy:
         sys.exit("Cannot find SLACK_WEBHOOK in environment.")
 
     headers = {"Content-type": "application/json"}
+    matrix = []
 
     # Format into slack messages
-    icons = ["⭐️", "😍️", "❤️", "👀️", "✨️", "🤖️", "💼️"]
+    icons = [
+        "⭐️",
+        "😍️",
+        "❤️",
+        "👀️",
+        "✨️",
+        "🤖️",
+        "💼️",
+        "🤩️",
+        "😸️",
+        "😻️",
+        "👉️",
+        "🕶️",
+        "🔥️",
+        "💻️",
+    ]
     for name in new:
         choice = random.choice(icons)
-        message = 'New Job! %s: %s' % (choice, name)
+        message = "New Job! %s: %s" % (choice, name)
+
+        # Add the job name, chosen icon, and message to the matrix
+        matrix.append([name, choice, message])
         data = {"text": message, "unfurl_links": True}
         print(data)
+
         response = requests.post(webhook, headers=headers, data=json.dumps(data))
         if response.status_code not in [200, 201]:
             print(response)
@@ -119,6 +148,7 @@ def main():
             )
 
     print("::set-output name=fields::%s" % list(new))
+    print("::set-output name=matrix::%s" % json.dumps(matrix))
 
 
 if __name__ == "__main__":

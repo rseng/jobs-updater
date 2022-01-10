@@ -77,3 +77,19 @@ jobs:
         name: Show New Jobs
         shell: bash
 ```
+
+By default, given that you have the slack webhook in the environment, deployment will
+happen because deploy is true. If you just want to test, then do:
+
+```yaml
+...
+      - id: updater
+        name: Job Updater
+        uses: rseng/jobs-updater@main
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+        with:
+          filename: "_data/jobs.yml"
+          key: "url"
+          deploy: false
+```
