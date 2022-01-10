@@ -36,12 +36,12 @@ fi
 
 # Are we deploying?
 DEPLOY=true
-if [[ "INPUT_DEPLOY" == "false" ]]; then
+if [[ "${INPUT_DEPLOY}" == "false" ]]; then
     DEPLOY=false
 fi
 
 # Do not deploy ever on test
-if [[ "INPUT_TEST" == "true" ]]; then
+if [[ "${INPUT_TEST}" == "true" ]]; then
     printf "🚧️ This is a test run! Deploy set to false 🚧️\n"
     DEPLOY=false
 fi
@@ -50,6 +50,10 @@ if [[ "${DEPLOY}" == "true" ]]; then
   COMMAND="python ${ACTION_DIR}/find-updates.py update --key ${INPUT_KEY} --original ${JOBFILE} --updated ${INPUT_FILENAME} --deploy"
 else
   COMMAND="python ${ACTION_DIR}/find-updates.py update --key ${INPUT_KEY} --original ${JOBFILE} --updated ${INPUT_FILENAME}"
+fi
+
+if [[ "${INPUT_TEST}" == "true" ]]; then
+  COMMAND="$COMMAND --test"
 fi
 
 echo "${COMMAND}"

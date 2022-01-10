@@ -55,6 +55,15 @@ def get_parser():
     )
 
     update.add_argument(
+        "--test",
+        "-t",
+        dest="test",
+        action="store_true",
+        default=False,
+        help="do a test run instead",
+    )
+
+    update.add_argument(
         "--updated",
         "-u",
         dest="updated",
@@ -92,6 +101,7 @@ def main():
     # Find new posts in updated
     previous = set()
     new = set()
+    entries = set()
     for item in original:
         if args.key in item:
             previous.add(item[args.key])
@@ -100,7 +110,14 @@ def main():
         if args.key in item and item[args.key] not in previous:
             new.add(item[args.key])
 
-    if not new:
+        # Also keep list of all for test
+        elif args.key in item and item[args.key]:
+            entries.add(item[args.key])
+
+    # Test uses all entries
+    if args.test:
+        new = entries
+    elif not new:
         print("No new jobs found.")
         print("::set-output name=fields::[]")
         sys.exit(0)
