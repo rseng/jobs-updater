@@ -93,3 +93,21 @@ happen because deploy is true. If you just want to test, then do:
           key: "url"
           deploy: false
 ```
+
+If you want to run a test run (meaning a random number of jobs will be selected that
+aren't necessarily new) then add test:
+
+```yaml
+...
+      - id: updater
+        name: Job Updater
+        uses: rseng/jobs-updater@main
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+        with:
+          filename: "_data/jobs.yml"
+          key: "url"
+          test: true
+```
+
+If test is true, deploy will always be set to false.
