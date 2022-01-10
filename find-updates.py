@@ -156,6 +156,10 @@ def main():
         data = {"text": message, "unfurl_links": True}
         print(data)
 
+        # Don't continue if testing
+        if not args.deploy or args.test:
+            continue
+
         response = requests.post(webhook, headers=headers, data=json.dumps(data))
         if response.status_code not in [200, 201]:
             print(response)
