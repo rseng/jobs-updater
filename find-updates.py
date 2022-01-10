@@ -133,11 +133,13 @@ def main():
     # Format into slack messages
     icons = [
         "⭐️",
+        "😍️",
         "❤️",
         "👀️",
         "✨️",
         "🤖️",
         "💼️",
+        "🤩️",
         "😸️",
         "😻️",
         "👉️",
@@ -149,8 +151,9 @@ def main():
         choice = random.choice(icons)
         message = "New Job! %s: %s" % (choice, name)
 
-        # Add the job name, chosen icon, and message to the matrix
-        matrix.append([name, choice, message])
+        # Add the job name to the matrix
+        # IMPORTANT: emojis in output mess up the action
+        matrix.append([name])
         data = {"text": message, "unfurl_links": True}
         print(data)
 
@@ -168,6 +171,8 @@ def main():
 
     print("::set-output name=fields::%s" % list(new))
     print("::set-output name=matrix::%s" % json.dumps(matrix))
+    print("matrix: %s" % json.dumps(matrix))
+    print("group: %s" % list(new))
 
 if __name__ == "__main__":
     main()
