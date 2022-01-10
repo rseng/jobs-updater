@@ -31,11 +31,14 @@ fi
 
 # Required to have slack webhook in environment
 if [ -z ${SLACK_WEBHOOK+x} ]; then 
-    printf "Please export SLACK_WEBHOOK to use this integration\n"
-    exit 1
+    printf "Warning, SLACK_WEBHOOK not found, will not deploy to slack.\n"
 fi
 
-COMMAND="python ${ACTION_DIR}/find-updates.py update --key ${INPUT_KEY} --original ${JOBFILE} --updated ${INPUT_FILENAME}"
+if [[ "INPUT_DEPLOY" == "true" ]]; then
+  COMMAND="python ${ACTION_DIR}/find-updates.py update --key ${INPUT_KEY} --original ${JOBFILE} --updated ${INPUT_FILENAME} --deploy"
+else
+  COMMAND="python ${ACTION_DIR}/find-updates.py update --key ${INPUT_KEY} --original ${JOBFILE} --updated ${INPUT_FILENAME}"
+fi
 
 echo "${COMMAND}"
 
