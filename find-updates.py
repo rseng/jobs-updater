@@ -170,7 +170,8 @@ def main():
 
     print("::set-output name=fields::%s" % list(new))
     print("::set-output name=matrix::%s" % json.dumps(matrix))
-
+    print("matrix: %s" % json.dumps(matrix))
+    print("group: %s" % list(new))
 
 if __name__ == "__main__":
     main()
