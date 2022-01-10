@@ -20,8 +20,10 @@ inputs:
 outputs:
   fields:
     description: New fields parsed
+    value: ${{ steps.jobs-updater.outputs.fields }}    
   matrix:
     description: Matrix (list of lists) with value (index 1), icon (index 2) and full message (index 3)
+    value: ${{ steps.jobs-updater.outputs.matrix }}    
     
 runs:
   using: "composite"
