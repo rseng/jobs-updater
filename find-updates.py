@@ -120,6 +120,7 @@ def main():
     elif not new:
         print("No new jobs found.")
         print("::set-output name=fields::[]")
+        print("::set-output name=matrix::[]")
         sys.exit(0)
 
     # Prepare the data
