@@ -48,7 +48,7 @@ fi
 
 # If everything not unset and deploy twitter is true, we deploy!
 DEPLOY_TWITTER=false
-if [ ! -z ${TWITTER_API_KEY+x} ] && [ ! -z ${TWITTER_API_SECRET+x} ] && [ ! -z ${TWITTER_CONSUMER_KEYY+x} ] && [ ! -z ${TWITTER_CONSUMER_SECRET+x} ] && [[ "${INPUT_TEST}" == "true" ]]; then 
+if [ ! -z ${TWITTER_API_KEY+x} ] && [ ! -z ${TWITTER_API_SECRET+x} ] && [ ! -z ${TWITTER_CONSUMER_KEY+x} ] && [ ! -z ${TWITTER_CONSUMER_SECRET+x} ] && [[ "${INPUT_TEST}" == "true" ]]; then 
     DEPLOY_TWITTER=true
 fi
 
