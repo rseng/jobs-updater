@@ -31,10 +31,10 @@ inputs:
 
   # Consumer keys are at the top of the developer interface, overall for the app (not a particular user)
   twitter_consumer_key:
-    description: consuer key generated for the entire app
+    description: consumer key generated for the entire app
     required: false
   twitter_consumer_secret:
-    description: consuer secret generated for the entire app
+    description: consumer secret generated for the entire app
     required: false
 
 outputs:
