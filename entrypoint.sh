@@ -46,6 +46,12 @@ if [[ "${INPUT_TEST}" == "true" ]]; then
     DEPLOY=false
 fi
 
+# If everything not unset and deploy twitter is true, we deploy!
+DEPLOY_TWITTER=false
+if [ ! -z ${TWITTER_API_KEY+x} ] && [ ! -z ${TWITTER_API_SECRET+x} ] && [ ! -z ${TWITTER_CONSUMER_KEYY+x} ] && [ ! -z ${TWITTER_CONSUMER_SECRET+x} ] && [[ "${INPUT_TEST}" == "true" ]]; then 
+    DEPLOY_TWITTER=true
+fi
+
 if [[ "${DEPLOY}" == "true" ]]; then
   COMMAND="python ${ACTION_DIR}/find-updates.py update --key ${INPUT_KEY} --original ${JOBFILE} --updated ${INPUT_FILENAME} --deploy"
 else
@@ -54,6 +60,10 @@ fi
 
 if [[ "${INPUT_TEST}" == "true" ]]; then
   COMMAND="$COMMAND --test"
+fi
+
+if [[ "${DEPLOY_TWITTER}" == "true" ]]; then
+  COMMAND="$COMMAND --deploy-twitter"
 fi
 
 echo "${COMMAND}"

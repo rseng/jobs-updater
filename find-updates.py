@@ -13,6 +13,7 @@ import json
 import os
 import sys
 import yaml
+import tweepy
 
 
 def read_yaml(filename):
@@ -55,6 +56,14 @@ def get_parser():
     )
 
     update.add_argument(
+        "--deploy-twitter",
+        dest="deploy_twitter",
+        action="store_true",
+        default=False,
+        help="deploy to Twitter (required api token/secret, and consumer token/secret",
+    )
+
+    update.add_argument(
         "--test",
         "-t",
         dest="test",
@@ -79,6 +88,27 @@ def get_parser():
     return parser
 
 
+def get_twitter_client():
+    envars = {}
+    for envar in [
+        "TWITTER_API_KEY",
+        "TWITTER_API_SECRET",
+        "TWITTER_CONSUMER_KEY",
+        "TWITTER_CONSUMER_SECRET",
+    ]:
+        value = os.environ.get(envar)
+        if not value:
+            sys.exit("%s is not set, and required when twitter deploy is true!" % envar)
+        envars[envar] = value
+
+    return tweepy.Client(
+        consumer_key=envars["TWITTER_CONSUMER_KEY"],
+        consumer_secret=envars["TWITTER_CONSUMER_SECRET"],
+        access_token=envars["TWITTER_API_KEY"],
+        access_token_secret=envars["TWITTER_API_SECRET"],
+    )
+
+
 def main():
     parser = get_parser()
 
@@ -94,6 +124,11 @@ def main():
     for filename in [args.original, args.updated]:
         if not os.path.exists(filename):
             sys.exit(f"{filename} does not exist.")
+
+    # Cut out early if we are deploying to twitter but missing envars
+    client = None
+    if args.deploy_twitter:
+        client = get_twitter_client()
 
     original = read_yaml(args.original)
     updated = read_yaml(args.updated)
@@ -159,6 +194,11 @@ def main():
         data = {"text": message, "unfurl_links": True}
         print(data)
 
+        # If we are instructed to deploy to twitter and have a client
+        if args.deploy_twitter and client:
+            message = "New #RSEng Job! %s: %s" % (choice, name)
+            client.create_tweet(text=message)
+
         # Don't continue if testing
         if not args.deploy or args.test:
             continue
@@ -176,6 +216,7 @@ def main():
     print("::set-output name=empty_matrix::false")
     print("matrix: %s" % json.dumps(matrix))
     print("group: %s" % list(new))
+
 
 if __name__ == "__main__":
     main()

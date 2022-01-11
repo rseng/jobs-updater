@@ -16,6 +16,26 @@ inputs:
     description: Deploy to slack?
     required: true
     default: true
+# If you want to post to Twitter, all of these credentials are required for a specific user
+
+  # API keys are typically generated on behalf of a user (at the bottom of the interface)
+  twitter_deploy:
+    description: Boolean to deploy to Twitter
+    required: false
+  twitter_api_key:
+    description: API key generated for the user account to tweet
+    required: false
+  twitter_api_secret:
+    description: API secret generated for the user account to tweet
+    required: false
+
+  # Consumer keys are at the top of the developer interface, overall for the app (not a particular user)
+  twitter_consumer_key:
+    description: consuer key generated for the entire app
+    required: false
+  twitter_consumer_secret:
+    description: consuer secret generated for the entire app
+    required: false
 
 outputs:
   fields:
@@ -32,7 +52,9 @@ runs:
   using: "composite"
   steps:
     - name: Install Python Dependencies
-      run: pip install pyyaml requests
+      run: |
+          pip install pyyaml requests
+          pip install git+https://github.com/tweepy/tweepy.git
       shell: bash
 
     - name: Run action entrypoint
@@ -45,5 +67,10 @@ runs:
         INPUT_REPO: ${{ github.repository }}
         INPUT_TEST: ${{ inputs.test }}
         INPUT_DEPLOY: ${{ inputs.deploy }}
+        TWITTER_DEPLOY: ${{ inputs.twitter_deploy }}
+        TWITTER_API_KEY: ${{ inputs.twitter_api_key }}
+        TWITTER_API_SECRET: ${{ inputs.twitter_api_secret }}
+        TWITTER_CONSUMER_KEY: ${{ inputs.twitter_consumer_key }}
+        TWITTER_CONSUMER_SECRET: ${{ inputs.twitter_consumer_secret }}
       run: ${{ github.action_path }}/entrypoint.sh
       shell: bash
