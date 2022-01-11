@@ -120,6 +120,7 @@ def main():
     elif not new:
         print("No new jobs found.")
         print("::set-output name=fields::[]")
+        print("::set-output name=empty_matrix::true")
         print("::set-output name=matrix::[]")
         sys.exit(0)
 
@@ -172,6 +173,7 @@ def main():
 
     print("::set-output name=fields::%s" % list(new))
     print("::set-output name=matrix::%s" % json.dumps(matrix))
+    print("::set-output name=empty_matrix::false")
     print("matrix: %s" % json.dumps(matrix))
     print("group: %s" % list(new))
 

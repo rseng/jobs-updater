@@ -23,7 +23,10 @@ outputs:
     value: ${{ steps.jobs-updater.outputs.fields }}    
   matrix:
     description: Matrix (list of lists) with value (index 1), icon (index 2) and full message (index 3)
-    value: ${{ steps.jobs-updater.outputs.matrix }}    
+    value: ${{ steps.jobs-updater.outputs.matrix }}
+  empty_matrix: 
+    description: true if empty, false otherwise
+    value: ${{ steps.jobs-updated.outputs.empty_matrix }}
     
 runs:
   using: "composite"
