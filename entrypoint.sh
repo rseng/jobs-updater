@@ -31,11 +31,40 @@ fi
 
 # Required to have slack webhook in environment
 if [ -z ${SLACK_WEBHOOK+x} ]; then 
-    printf "Please export SLACK_WEBHOOK to use this integration\n"
-    exit 1
+    printf "Warning, SLACK_WEBHOOK not found, will not deploy to slack.\n"
 fi
 
-COMMAND="python ${ACTION_DIR}/find-updates.py update --key ${INPUT_KEY} --original ${JOBFILE} --updated ${INPUT_FILENAME}"
+# Are we deploying?
+DEPLOY=true
+if [[ "${INPUT_DEPLOY}" == "false" ]]; then
+    DEPLOY=false
+fi
+
+# Do not deploy ever on test
+if [[ "${INPUT_TEST}" == "true" ]]; then
+    printf "🚧️ This is a test run! Deploy set to false 🚧️\n"
+    DEPLOY=false
+fi
+
+# If everything not unset and deploy twitter is true, we deploy!
+DEPLOY_TWITTER=false
+if [ ! -z ${TWITTER_API_KEY+x} ] && [ ! -z ${TWITTER_API_SECRET+x} ] && [ ! -z ${TWITTER_CONSUMER_KEY+x} ] && [ ! -z ${TWITTER_CONSUMER_SECRET+x} ] && [[ "${TWITTER_DEPLOY}" == "true" ]]; then 
+    DEPLOY_TWITTER=true
+fi
+
+if [[ "${DEPLOY}" == "true" ]]; then
+  COMMAND="python ${ACTION_DIR}/find-updates.py update --key ${INPUT_KEY} --original ${JOBFILE} --updated ${INPUT_FILENAME} --deploy"
+else
+  COMMAND="python ${ACTION_DIR}/find-updates.py update --key ${INPUT_KEY} --original ${JOBFILE} --updated ${INPUT_FILENAME}"
+fi
+
+if [[ "${INPUT_TEST}" == "true" ]]; then
+  COMMAND="$COMMAND --test"
+fi
+
+if [[ "${DEPLOY_TWITTER}" == "true" ]]; then
+  COMMAND="$COMMAND --deploy-twitter"
+fi
 
 echo "${COMMAND}"
 

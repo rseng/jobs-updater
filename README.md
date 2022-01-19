@@ -47,6 +47,8 @@ and put it in a safe place. We will want to keep this URL as a secret in our eve
 Add an GitHub workflow file in `.github/workflows` to specify the following. Note that
 the workflow below will do the check and update on any push to main (e.g., a merged pull request).
 
+### Deploy to Slack
+
 ```yaml
 on:
   push:
@@ -76,4 +78,65 @@ jobs:
       - run: echo ${{ steps.updater.outputs.fields }}
         name: Show New Jobs
         shell: bash
+```
+
+By default, given that you have the slack webhook in the environment, deployment will
+happen because deploy is true. If you just want to test, then do:
+
+```yaml
+...
+      - id: updater
+        name: Job Updater
+        uses: rseng/jobs-updater@main
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+        with:
+          filename: "_data/jobs.yml"
+          key: "url"
+          deploy: false
+```
+
+If you want to run a test run (meaning a random number of jobs will be selected that
+aren't necessarily new) then add test:
+
+```yaml
+...
+      - id: updater
+        name: Job Updater
+        uses: rseng/jobs-updater@main
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+        with:
+          filename: "_data/jobs.yml"
+          key: "url"
+          test: true
+```
+
+If test is true, deploy will always be set to false.
+
+### Deploy to Twitter
+
+To deploy to Twitter (in addiction to slack) you are required to set `deploy_twitter`
+to true, and also define all the needed environment variables in your repository
+secrets.
+
+```yaml
+      - id: updater
+        name: Job Updater
+        uses: rseng/jobs-updater@add/deploy-arg
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+        with:
+          filename: "_data/jobs.yml"
+          key: "url"
+
+          deploy: true
+          test: false
+
+          # Also deploy to Twitter (all secrets required in repository secrets)
+          twitter_deploy: true
+          twitter_api_secret: ${{ secrets.TWITTER_ACCESS_SECRET }}
+          twitter_api_key: ${{ secrets.TWITTER_ACCESS_TOKEN }}
+          twitter_consumer_secret: ${{ secrets.TWITTER_CONSUMER_API_SECRET }}
+          twitter_consumer_key: ${{ secrets.TWITTER_CONSUMER_API_KEY }}
 ```
