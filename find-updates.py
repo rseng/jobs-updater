@@ -228,7 +228,7 @@ def main():
 
         # Add the job name to the matrix
         # IMPORTANT: emojis in output mess up the action
-        matrix.append([filtered])
+        matrix.append(filtered)
         data = {"text": message, "unfurl_links": True}
 
         # If we are instructed to deploy to twitter and have a client
