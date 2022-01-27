@@ -224,7 +224,7 @@ def main():
             try:
                 filtered[k] = json.dumps(v)
             except:
-                continue 
+                continue
 
         # Add the job name to the matrix
         # IMPORTANT: emojis in output mess up the action
@@ -235,7 +235,10 @@ def main():
         if args.deploy_twitter and client:
             message = "New #RSEng Job! %s\n%s" % (choice, post)
             print(message)
-            client.create_tweet(text=message)
+            try:
+                client.create_tweet(text=message)
+            except Exception as e:
+                print("Issue posting tweet: %s, and length is %s" % (e, len(message)))
 
         # Don't continue if testing
         if not args.deploy or args.test:
