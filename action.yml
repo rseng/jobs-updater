@@ -46,7 +46,7 @@ inputs:
 
 outputs:
   fields:
-    description: New fields parsed
+    description: Fields (keys) parsed
     value: ${{ steps.jobs-updater.outputs.fields }}    
   matrix:
     description: Matrix (list of lists) with value (index 1), icon (index 2) and full message (index 3)

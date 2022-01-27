@@ -224,7 +224,7 @@ def main():
             try:
                 filtered[k] = json.dumps(v)
             except:
-                continue
+                continue 
 
         # Add the job name to the matrix
         # IMPORTANT: emojis in output mess up the action
@@ -249,7 +249,7 @@ def main():
                 % (response.reason, response.status_code)
             )
 
-    print("::set-output name=fields::%s" % new)
+    print("::set-output name=fields::%s" % json.dumps(keys))
     print("::set-output name=matrix::%s" % json.dumps(matrix))
     print("::set-output name=empty_matrix::false")
     print("matrix: %s" % json.dumps(matrix))
