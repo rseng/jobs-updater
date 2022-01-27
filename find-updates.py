@@ -221,7 +221,10 @@ def main():
         # Convert dates, etc. back to string
         filtered = {}
         for k, v in entry.items():
-            filtered[k] = str(v)
+            try:
+                filtered[k] = json.dumps(v)
+            except:
+                continue
 
         # Add the job name to the matrix
         # IMPORTANT: emojis in output mess up the action
