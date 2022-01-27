@@ -40,7 +40,7 @@ jobs:
           test: true
 
       - run: echo ${{ steps.updater.outputs.fields }}
-        name: Show New Jobs
+        name: Show Keys Used
         shell: bash
         
       - run: echo ${{ steps.updater.outputs.matrix }}
