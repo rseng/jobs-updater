@@ -1,9 +1,5 @@
 on:
-  push:
-    paths:
-      - 'example/jobs.yaml'
-    branches:
-      - main
+  pull_request: []
 
 jobs:
   slack-poster:
@@ -21,8 +17,32 @@ jobs:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         with:
           filename: "example/jobs.yaml"
-          key: "url"
+          previous_filename: "example/jobs-previous.yaml"
+          keys: "url"
+          unique: "url"
+
+          deploy: false
+          test: true
+
+
+      - id: multifield_updater
+        name: Job Updater
+        uses: ./
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+        with:
+          filename: "example/jobs.yaml"
+          previous_filename: "example/jobs-previous.yaml"
+          keys: "name,location,url"
+          unique: "url"
+
+          deploy: false
+          test: true
 
       - run: echo ${{ steps.updater.outputs.fields }}
-        name: Show New Jobs
+        name: Show Keys Used
+        shell: bash
+        
+      - run: echo ${{ steps.updater.outputs.matrix }}
+        name: Show Matrix
         shell: bash

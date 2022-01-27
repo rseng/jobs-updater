@@ -3,10 +3,9 @@
 # This script does the following.
 # 1. Reads in a current and changed yaml file
 # 2. Finds changes between the two
-# 3. Post them to slack
+# 3. Post them to slack and/or Twitter
 
 import argparse
-from datetime import datetime
 import requests
 import random
 import json
@@ -80,9 +79,16 @@ def get_parser():
     )
 
     update.add_argument(
-        "--key",
-        dest="key",
-        help="The key to post to slack",
+        "--keys",
+        dest="keys",
+        help="The keys (comma separated list) to post to slack or Twitter",
+    )
+
+    update.add_argument(
+        "--unique",
+        dest="unique",
+        help="The key to use to determine uniqueness (defaults to url)",
+        default="url",
     )
 
     return parser
@@ -109,6 +115,20 @@ def get_twitter_client():
     )
 
 
+def prepare_post(entry, keys):
+    """Prepare the slack or tweet. There should be a descriptor for
+    all fields except for url.
+    """
+    post = ""
+    for key in keys:
+        if key in entry:
+            if key == "url":
+                post = post + entry[key] + "\n"
+            else:
+                post = post + key.capitalize() + ": " + entry[key] + "\n"
+    return post
+
+
 def main():
     parser = get_parser()
 
@@ -133,21 +153,25 @@ def main():
     original = read_yaml(args.original)
     updated = read_yaml(args.updated)
 
+    # Parse keys into list
+    keys = [x for x in args.keys.split(",") if x]
+
     # Find new posts in updated
     previous = set()
-    new = set()
-    entries = set()
     for item in original:
-        if args.key in item:
-            previous.add(item[args.key])
+        if args.unique in item:
+            previous.add(item[args.unique])
 
+    # Create a lookup by the unique id
+    new = []
+    entries = []
     for item in updated:
-        if args.key in item and item[args.key] not in previous:
-            new.add(item[args.key])
+        if args.unique in item and item[args.unique] not in previous:
+            new.append(item)
 
         # Also keep list of all for test
-        elif args.key in item and item[args.key]:
-            entries.add(item[args.key])
+        elif args.unique in item and item[args.unique]:
+            entries.append(item)
 
     # Test uses all entries
     if args.test:
@@ -184,20 +208,37 @@ def main():
         "🔥️",
         "💻️",
     ]
-    for name in new:
+
+    for entry in new:
+
+        # Prepare the post
+        post = prepare_post(entry, keys)
+
         choice = random.choice(icons)
-        message = "New Job! %s: %s" % (choice, name)
+        message = "New Job! %s\n%s" % (choice, post)
+        print(message)
+
+        # Convert dates, etc. back to string
+        filtered = {}
+        for k, v in entry.items():
+            try:
+                filtered[k] = json.dumps(v)
+            except:
+                continue
 
         # Add the job name to the matrix
         # IMPORTANT: emojis in output mess up the action
-        matrix.append([name])
+        matrix.append(filtered)
         data = {"text": message, "unfurl_links": True}
-        print(data)
 
         # If we are instructed to deploy to twitter and have a client
         if args.deploy_twitter and client:
-            message = "New #RSEng Job! %s: %s" % (choice, name)
-            client.create_tweet(text=message)
+            message = "New #RSEng Job! %s\n%s" % (choice, post)
+            print(message)
+            try:
+                client.create_tweet(text=message)
+            except Exception as e:
+                print("Issue posting tweet: %s, and length is %s" % (e, len(message)))
 
         # Don't continue if testing
         if not args.deploy or args.test:
@@ -211,11 +252,11 @@ def main():
                 % (response.reason, response.status_code)
             )
 
-    print("::set-output name=fields::%s" % list(new))
+    print("::set-output name=fields::%s" % json.dumps(keys))
     print("::set-output name=matrix::%s" % json.dumps(matrix))
     print("::set-output name=empty_matrix::false")
     print("matrix: %s" % json.dumps(matrix))
-    print("group: %s" % list(new))
+    print("group: %s" % new)
 
 
 if __name__ == "__main__":
