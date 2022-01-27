@@ -218,11 +218,15 @@ def main():
         message = "New Job! %s\n%s" % (choice, post)
         print(message)
 
+        # Convert dates, etc. back to string
+        filtered = {}
+        for k, v in entry.items():
+            filtered[k] = str(v)
+
         # Add the job name to the matrix
         # IMPORTANT: emojis in output mess up the action
-        matrix.append([entry])
+        matrix.append([filtered])
         data = {"text": message, "unfurl_links": True}
-        print(data)
 
         # If we are instructed to deploy to twitter and have a client
         if args.deploy_twitter and client:
