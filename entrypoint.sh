@@ -52,18 +52,18 @@ if [ ! -z ${TWITTER_API_KEY+x} ] && [ ! -z ${TWITTER_API_SECRET+x} ] && [ ! -z $
     DEPLOY_TWITTER=true
 fi
 
+COMMAND="python ${ACTION_DIR}/find-updates.py update --key ${INPUT_KEY} --original ${JOBFILE} --updated ${INPUT_FILENAME}"
+
 if [[ "${DEPLOY}" == "true" ]]; then
-  COMMAND="python ${ACTION_DIR}/find-updates.py update --key ${INPUT_KEY} --original ${JOBFILE} --updated ${INPUT_FILENAME} --deploy"
-else
-  COMMAND="python ${ACTION_DIR}/find-updates.py update --key ${INPUT_KEY} --original ${JOBFILE} --updated ${INPUT_FILENAME}"
+  COMMAND="${COMMAND} --deploy"
 fi
 
 if [[ "${INPUT_TEST}" == "true" ]]; then
-  COMMAND="$COMMAND --test"
+  COMMAND="${COMMAND} --test"
 fi
 
 if [[ "${DEPLOY_TWITTER}" == "true" ]]; then
-  COMMAND="$COMMAND --deploy-twitter"
+  COMMAND="${COMMAND} --deploy-twitter"
 fi
 
 echo "${COMMAND}"
