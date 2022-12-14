@@ -4,6 +4,8 @@
 # 1. Reads in a current and changed yaml file
 # 2. Finds changes between the two
 # 3. Post them to slack
+# 4. Optionally post them to Twitter
+# 5. Optionally post them to Mastodon
 
 import argparse
 from datetime import datetime
@@ -14,7 +16,7 @@ import os
 import sys
 import yaml
 import tweepy
-
+import Mastodon.py
 
 def read_yaml(filename):
     with open(filename, "r") as stream:
@@ -60,7 +62,7 @@ def get_parser():
         dest="deploy_twitter",
         action="store_true",
         default=False,
-        help="deploy to Twitter (required api token/secret, and consumer token/secret",
+        help="deploy to Twitter (required api token/secret, and consumer token/secret)",
     )
 
     update.add_argument(
