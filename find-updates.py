@@ -16,7 +16,7 @@ import os
 import sys
 import yaml
 import tweepy
-import Mastodon.py
+from mastodon import Mastodon
 
 def read_yaml(filename):
     with open(filename, "r") as stream:
@@ -66,6 +66,14 @@ def get_parser():
     )
 
     update.add_argument(
+        "--deploy-mastodon",
+        dest="deploy_mastodon",
+        action="store_true",
+        default=False,
+        help="deploy to Mastodon (required api token, and api_base_url)",
+    )
+
+    update.add_argument(
         "--test",
         "-t",
         dest="test",
@@ -110,6 +118,21 @@ def get_twitter_client():
         access_token_secret=envars["TWITTER_API_SECRET"],
     )
 
+def get_mastodon_client():
+    envars = {}
+    for envar in [
+        "MASTODON_ACCESS_TOKEN",
+        "MASTODON_API_BASE_URL",
+    ]:
+        value = os.environ.get(envar)
+        if not value:
+            sys.exit("%s is not set, and required when mastodon deploy is true!" % envar)
+        envars[envar] = value
+
+    return Mastodon(
+        access_token=envars["MASTODON_ACCESS_TOKEN"],
+        api_base_url=envars["MASTODON_API_BASE_URL"],
+    )
 
 def main():
     parser = get_parser()
@@ -127,10 +150,14 @@ def main():
         if not os.path.exists(filename):
             sys.exit(f"{filename} does not exist.")
 
-    # Cut out early if we are deploying to twitter but missing envars
+    # Cut out early if we are deploying to twitter or mastodon but missing envars
     client = None
     if args.deploy_twitter:
         client = get_twitter_client()
+
+    mastodon_client = None
+    if args.deploy_mastodon:
+        mastodon_client = get_mastodon_client()
 
     original = read_yaml(args.original)
     updated = read_yaml(args.updated)
@@ -200,6 +227,11 @@ def main():
         if args.deploy_twitter and client:
             message = "New #RSEng Job! %s: %s" % (choice, name)
             client.create_tweet(text=message)
+
+        # If we are instructed to deploy to mastodon and have a client
+        if args.deploy_mastodon and mastodon_client:
+            message = "New #RSEng Job! %s: %s" % (choice, name)
+            mastodon_client.toot(text=message)
 
         # Don't continue if testing
         if not args.deploy or args.test:
