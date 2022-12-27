@@ -55,6 +55,7 @@ runs:
       run: |
           pip install pyyaml requests
           pip install git+https://github.com/tweepy/tweepy.git
+          pip install Mastodon.py
       shell: bash
 
     - name: Run action entrypoint
