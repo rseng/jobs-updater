@@ -4,7 +4,6 @@ on:
       - 'example/jobs.yaml'
     branches:
       - main
-      - mastodon
 
 jobs:
   slack-poster:
