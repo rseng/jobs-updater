@@ -53,9 +53,8 @@ runs:
   steps:
     - name: Install Python Dependencies
       run: |
-          pip install pyyaml requests
+          pip install pyyaml requests Mastodon.py
           pip install git+https://github.com/tweepy/tweepy.git
-          pip install Mastodon.py
       shell: bash
 
     - name: Run action entrypoint
