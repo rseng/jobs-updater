@@ -1,16 +1,30 @@
-- expires: 2023-01-06
-  location: Benioff Ocean Science Laboratory, Marine Science Institute, UC Santa Barbara, CA
-  name: Assistant or Associate Specialist (Software Engineer)
-  url: https://recruit.ap.ucsb.edu/JPF02400
-- expires: 2023-10-08
+- expires: 2023-01-21
+  location: Brookhaven National Laboratory, Upton, NY (remote, telework can be negotiatd)
+  name: Scientific Software Developer
+  posted: 2022-12-28
+  url: https://jobs.bnl.gov/job/upton/scientific-software-developer/3437/31300284992
+- expires: 2021-10-06
   location: University of Michigan, Ann Arbor, Michigan
-  name: Researcher
-  url: https://example.com/a/
-- expires: 2023-10-07
-  location: University of Michigan, Ann Arbor, Michigan
-  name: Researcher
-  url: https://example.com/research/
-- expires: 2023-10-06
-  location: University of Michigan, Ann Arbor, Michigan
+  name: Research Software Programmer
+  url: https://careers.umich.edu/job_detail/204649/research_software_programmer_-_mobile_python
+- expires: 2021-10-31
+  location: Princeton University, Princeton, NJ
   name: Research Software Engineer
-  url: https://example.com/rse/
+  url: https://main-princeton.icims.com/jobs/13218/research-software-engineer/job?hub=15
+- expires: 2021-09-30
+  location: Scoot Science - remote in the US or Canada
+  name: Data Engineer & Full Stack Software Engineer
+  url: https://www.scootscience.com/careers/
+- expires: 2020-12-31
+  location: National Center for Supercomputing Applications / University of Illinois,
+    Urbana, IL
+  name: Assistant Research Programmer/Research Programmer/Senior Research Programmer
+  url: https://jobs.illinois.edu/academic-job-board/job-details?jobID=130370&job=research-programmer-national-center-for-supercomputing-applications-130370
+- expires: 2020-12-31
+  location: National Center for Supercomputing Applications / University of Illinois, Urbana, IL
+  name: Assistant Research Programmer/Research Programmer/Senior Research Programmer
+  url: https://jobs.hr.wisc.edu/en-us/job/510571/researcher
+- expires: 2020-12-31
+  location: National Center for Supercomputing Applications / University of Illinois, Urbana, IL
+  name: Assistant Research Programmer/Research Programmer/Senior Research Programmer
+  url: https://jobs.ornl.gov/job/Oak-Ridge-Full-Stack-Software-Engineer-TN-37830/793411000/
