@@ -170,6 +170,6 @@ secrets.
           # 4) also add a secret named MASTODON_API_BASE_URL with the value of, e.g.,
           #    https://YOUR.MASTODON.SITE.HERE/
           mastodon_deploy: true
-          mastodon_access_token: ${{ secrets.mastodon_access_token }}
-          mastodon_api_base_url: ${{ secrets.mastodon_api_base_url }}
+          mastodon_access_token: ${{ secrets.MASTODON_ACCESS_TOKEN }}
+          mastodon_api_base_url: ${{ secrets.MASTODON_API_BASE_URL }}
 ```

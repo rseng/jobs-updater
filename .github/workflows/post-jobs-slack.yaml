@@ -22,6 +22,13 @@ jobs:
         with:
           filename: "example/jobs.yaml"
           key: "url"
+          deploy: false
+          test: false
+
+          # Also deploy to Twitter (all secrets required in repository secrets)
+          mastodon_deploy: true
+          mastodon_access_token: ${{ secrets.MASTODON_ACCESS_TOKEN }}
+          mastodon_api_base_url: ${{ secrets.MASTODON_API_BASE_URL }}
 
       - run: echo ${{ steps.updater.outputs.fields }}
         name: Show New Jobs
