@@ -70,7 +70,7 @@ def get_parser():
         dest="deploy_mastodon",
         action="store_true",
         default=False,
-        help="deploy to Mastodon (required api token, and api_base_url)",
+        help="deploy to Mastodon (required access token, and API base URL)",
     )
 
     update.add_argument(

@@ -141,7 +141,7 @@ secrets.
           twitter_consumer_key: ${{ secrets.TWITTER_CONSUMER_API_KEY }}
 ```
 
-### Deploy to Twitter
+### Deploy to Mastodon
 
 To deploy to Mastodon (in addiction to Slack) you are required to set `deploy_mastodon`
 to true, and also define all the needed environment variables in your repository
