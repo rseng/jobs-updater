@@ -1,9 +1,5 @@
 on:
-  push:
-    paths:
-      - 'example/jobs.yaml'
-    branches:
-      - main
+  pull_request: []
 
 jobs:
   slack-poster:
@@ -21,15 +17,36 @@ jobs:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         with:
           filename: "example/jobs.yaml"
-          key: "url"
+          previous_filename: "example/jobs-previous.yaml"
+          keys: "url"
+          unique: "url"
+
           deploy: false
           test: false
 
-          # Also deploy to Twitter (all secrets required in repository secrets)
+          # Also deploy to Mastodon (all secrets required in repository secrets)
           mastodon_deploy: true
           mastodon_access_token: ${{ secrets.MASTODON_ACCESS_TOKEN }}
           mastodon_api_base_url: ${{ secrets.MASTODON_API_BASE_URL }}
 
+      - id: multifield_updater
+        name: Job Updater
+        uses: ./
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+        with:
+          filename: "example/jobs.yaml"
+          previous_filename: "example/jobs-previous.yaml"
+          keys: "name,location,url"
+          unique: "url"
+
+          deploy: false
+          test: true
+
       - run: echo ${{ steps.updater.outputs.fields }}
-        name: Show New Jobs
+        name: Show Keys Used
+        shell: bash
+        
+      - run: echo ${{ steps.updater.outputs.matrix }}
+        name: Show Matrix
         shell: bash

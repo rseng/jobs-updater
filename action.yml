@@ -4,9 +4,16 @@ inputs:
   filename:
     description: the filename for the jobs
     required: true
-  key:
-    description: The key of the list to post (defaults to url)
+  previous_filename:
+    description: the previous filename (usually only for manual tesing)
     required: false
+  keys:
+    description: Comma separated list of keys to post (defaults to url)
+    required: false
+    default: url
+  unique:
+    description: Field to use to determine uniqueness
+    required: true
     default: url
   test:
     description: Test the updater (ensure there are jobs)
@@ -50,8 +57,8 @@ inputs:
 
 outputs:
   fields:
-    description: New fields parsed
-    value: ${{ steps.jobs-updater.outputs.fields }}
+    description: Fields (keys) parsed
+    value: ${{ steps.jobs-updater.outputs.fields }}    
   matrix:
     description: Matrix (list of lists) with value (index 1), icon (index 2) and full message (index 3)
     value: ${{ steps.jobs-updater.outputs.matrix }}
@@ -71,8 +78,10 @@ runs:
     - name: Run action entrypoint
       id: jobs-updater
       env:
+        INPUT_PREVIOUS_FILENAME: ${{ inputs.previous_filename }}
         INPUT_FILENAME: ${{ inputs.filename }}
-        INPUT_KEY: ${{ inputs.key }}
+        INPUT_KEYS: ${{ inputs.keys }}
+        INPUT_UNIQUE: ${{ inputs.unique }}
         CURRENT_SHA: ${{ github.sha }}
         ACTION_DIR: ${{ github.action_path }}
         INPUT_REPO: ${{ github.repository }}
