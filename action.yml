@@ -72,6 +72,7 @@ runs:
         TWITTER_API_SECRET: ${{ inputs.twitter_api_secret }}
         TWITTER_CONSUMER_KEY: ${{ inputs.twitter_consumer_key }}
         TWITTER_CONSUMER_SECRET: ${{ inputs.twitter_consumer_secret }}
+        MASTODON_DEPLOY: ${{ inputs.mastodon_deploy }}
         MASTODON_ACCESS_TOKEN: ${{ inputs.mastodon_access_token }}
         MASTODON_API_BASE_URL: ${{ inputs.mastodon_api_base_url }}
       run: ${{ github.action_path }}/entrypoint.sh
