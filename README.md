@@ -140,3 +140,28 @@ secrets.
           twitter_consumer_secret: ${{ secrets.TWITTER_CONSUMER_API_SECRET }}
           twitter_consumer_key: ${{ secrets.TWITTER_CONSUMER_API_KEY }}
 ```
+
+### Deploy to Twitter
+
+To deploy to Mastodon (in addiction to Slack) you are required to set `deploy_mastodon`
+to true, and also define all the needed environment variables in your repository
+secrets.
+
+```yaml
+      - id: updater
+        name: Job Updater
+        uses: rseng/jobs-updater@add/deploy-arg
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+        with:
+          filename: "_data/jobs.yml"
+          key: "url"
+
+          deploy: true
+          test: false
+
+          # Also deploy to Mastodon (all secrets required in repository secrets)
+          mastodon_deploy: true
+          mastodon_access_token: ${{ secrets.mastodon_access_token }}
+          mastodon_api_base_url: ${{ secrets.mastodon_api_base_url }}
+```

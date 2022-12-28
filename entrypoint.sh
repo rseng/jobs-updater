@@ -52,6 +52,12 @@ if [ ! -z ${TWITTER_API_KEY+x} ] && [ ! -z ${TWITTER_API_SECRET+x} ] && [ ! -z $
     DEPLOY_TWITTER=true
 fi
 
+# likewise for mastodon
+DEPLOY_MASTODON=false
+if [ ! -z ${MASTODON_ACCESS_TOKEN+x} ] && [ ! -z ${MASTODON_API_BASE_URL+x} ] && [[ "${MASTODON_DEPLOY}" == "true" ]]; then
+    DEPLOY_MASTODON=true
+fi
+
 COMMAND="python ${ACTION_DIR}/find-updates.py update --key ${INPUT_KEY} --original ${JOBFILE} --updated ${INPUT_FILENAME}"
 
 if [[ "${DEPLOY}" == "true" ]]; then
@@ -64,6 +70,10 @@ fi
 
 if [[ "${DEPLOY_TWITTER}" == "true" ]]; then
   COMMAND="${COMMAND} --deploy-twitter"
+fi
+
+if [[ "${DEPLOY_MASTODON}" == "true" ]]; then
+  COMMAND="${COMMAND} --deploy-mastodon"
 fi
 
 echo "${COMMAND}"
