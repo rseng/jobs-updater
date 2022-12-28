@@ -143,7 +143,7 @@ secrets.
 
 ### Deploy to Mastodon
 
-To deploy to Mastodon (in addiction to Slack) you are required to set `deploy_mastodon`
+To deploy to Mastodon (in addition to Slack) you are required to set `deploy_mastodon`
 to true, and also define all the needed environment variables in your repository
 secrets.
 
