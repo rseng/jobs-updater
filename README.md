@@ -150,7 +150,7 @@ secrets.
 ```yaml
       - id: updater
         name: Job Updater
-        uses: rseng/jobs-updater@add/deploy-arg
+        uses: rseng/jobs-updater@main
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         with:
