@@ -231,7 +231,7 @@ def main():
         # If we are instructed to deploy to mastodon and have a client
         if args.deploy_mastodon and mastodon_client:
             message = "New #RSEng Job! %s: %s" % (choice, name)
-            mastodon_client.toot(text=message)
+            mastodon_client.toot(status=message)
 
         # Don't continue if testing
         if not args.deploy or args.test:
