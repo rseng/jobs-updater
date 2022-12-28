@@ -44,7 +44,7 @@ inputs:
   mastodon_access_token:
     description: API key generated for the user account to tweet
     required: false
-  nastodon_api_base_url:
+  mastodon_api_base_url:
     description: Base URL of the Mastodon instance to post to, e.g., https://fosstodon.org/
     required: false
 
