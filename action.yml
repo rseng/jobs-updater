@@ -3,7 +3,7 @@ description: "The jobs updater will respond on some trigger, and them parse a jo
 inputs:
   filename:
     description: the filename for the jobs
-    required: true    
+    required: true
   key:
     description: The key of the list to post (defaults to url)
     required: false
@@ -37,17 +37,28 @@ inputs:
     description: consumer secret generated for the entire app
     required: false
 
+# If you want to post to Mastodon, these values are required
+  mastdodon_deploy:
+    description: Boolean to deploy to Mastodon
+    required: false
+  mastodon_access_token:
+    description: API key generated for the user account to tweet
+    required: false
+  nastodon_api_base_url:
+    description: Base URL of the Mastodon instance to post to, e.g., https://fosstodon.org/
+    required: false
+
 outputs:
   fields:
     description: New fields parsed
-    value: ${{ steps.jobs-updater.outputs.fields }}    
+    value: ${{ steps.jobs-updater.outputs.fields }}
   matrix:
     description: Matrix (list of lists) with value (index 1), icon (index 2) and full message (index 3)
     value: ${{ steps.jobs-updater.outputs.matrix }}
-  empty_matrix: 
+  empty_matrix:
     description: true if empty, false otherwise
     value: ${{ steps.jobs-updated.outputs.empty_matrix }}
-    
+
 runs:
   using: "composite"
   steps:

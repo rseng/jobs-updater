@@ -3,7 +3,7 @@
 set -e
 
 echo $PWD
-ls 
+ls
 
 # Ensure the jobfile exists
 if [[ ! -f "${INPUT_FILENAME}" ]]; then
@@ -30,7 +30,7 @@ if [[ ! -f "${JOBFILE}" ]]; then
 fi
 
 # Required to have slack webhook in environment
-if [ -z ${SLACK_WEBHOOK+x} ]; then 
+if [ -z ${SLACK_WEBHOOK+x} ]; then
     printf "Warning, SLACK_WEBHOOK not found, will not deploy to slack.\n"
 fi
 
@@ -48,7 +48,7 @@ fi
 
 # If everything not unset and deploy twitter is true, we deploy!
 DEPLOY_TWITTER=false
-if [ ! -z ${TWITTER_API_KEY+x} ] && [ ! -z ${TWITTER_API_SECRET+x} ] && [ ! -z ${TWITTER_CONSUMER_KEY+x} ] && [ ! -z ${TWITTER_CONSUMER_SECRET+x} ] && [[ "${TWITTER_DEPLOY}" == "true" ]]; then 
+if [ ! -z ${TWITTER_API_KEY+x} ] && [ ! -z ${TWITTER_API_SECRET+x} ] && [ ! -z ${TWITTER_CONSUMER_KEY+x} ] && [ ! -z ${TWITTER_CONSUMER_SECRET+x} ] && [[ "${TWITTER_DEPLOY}" == "true" ]]; then
     DEPLOY_TWITTER=true
 fi
 
