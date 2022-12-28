@@ -29,6 +29,11 @@ if [[ ! -f "${JOBFILE}" ]]; then
     exit 1
 fi
 
+# If we are verbatim given a previous filename, use it
+if [ ! -z ${INPUT_PREVIOUS_FILENAME} ]; then 
+    JOBFILE="${INPUT_PREVIOUS_FILENAME}"
+fi
+
 # Required to have slack webhook in environment
 if [ -z ${SLACK_WEBHOOK+x} ]; then 
     printf "Warning, SLACK_WEBHOOK not found, will not deploy to slack.\n"
@@ -53,9 +58,9 @@ if [ ! -z ${TWITTER_API_KEY+x} ] && [ ! -z ${TWITTER_API_SECRET+x} ] && [ ! -z $
 fi
 
 if [[ "${DEPLOY}" == "true" ]]; then
-  COMMAND="python ${ACTION_DIR}/find-updates.py update --key ${INPUT_KEY} --original ${JOBFILE} --updated ${INPUT_FILENAME} --deploy"
+  COMMAND="python ${ACTION_DIR}/find-updates.py update --keys ${INPUT_KEYS} --unique ${INPUT_UNIQUE} --original ${JOBFILE} --updated ${INPUT_FILENAME} --deploy"
 else
-  COMMAND="python ${ACTION_DIR}/find-updates.py update --key ${INPUT_KEY} --original ${JOBFILE} --updated ${INPUT_FILENAME}"
+  COMMAND="python ${ACTION_DIR}/find-updates.py update --keys ${INPUT_KEYS} --unique ${INPUT_UNIQUE} --original ${JOBFILE} --updated ${INPUT_FILENAME}"
 fi
 
 if [[ "${INPUT_TEST}" == "true" ]]; then

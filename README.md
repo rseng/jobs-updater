@@ -44,7 +44,7 @@ and put it in a safe place. We will want to keep this URL as a secret in our eve
 
 ## 2. Usage
 
-Add an GitHub workflow file in `.github/workflows` to specify the following. Note that
+Add a GitHub workflow file in `.github/workflows` to specify the following. Note that
 the workflow below will do the check and update on any push to main (e.g., a merged pull request).
 
 ### Deploy to Slack
@@ -73,13 +73,15 @@ jobs:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         with:
           filename: "_data/jobs.yml"
-          key: "url"
+          keys: "url,name"
+          unique: "url"
 
       - run: echo ${{ steps.updater.outputs.fields }}
         name: Show New Jobs
         shell: bash
 ```
 
+In the above, we will include the url and name fields, and use the url field to determine uniqueness (default).
 By default, given that you have the slack webhook in the environment, deployment will
 happen because deploy is true. If you just want to test, then do:
 
@@ -92,7 +94,7 @@ happen because deploy is true. If you just want to test, then do:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         with:
           filename: "_data/jobs.yml"
-          key: "url"
+          keys: "url"
           deploy: false
 ```
 
@@ -108,7 +110,7 @@ aren't necessarily new) then add test:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         with:
           filename: "_data/jobs.yml"
-          key: "url"
+          keys: "url"
           test: true
 ```
 
@@ -128,7 +130,7 @@ secrets.
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         with:
           filename: "_data/jobs.yml"
-          key: "url"
+          keys: "url,name"
 
           deploy: true
           test: false
