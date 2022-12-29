@@ -3,7 +3,7 @@
 set -e
 
 echo $PWD
-ls 
+ls
 
 # Ensure the jobfile exists
 if [[ ! -f "${INPUT_FILENAME}" ]]; then
@@ -35,7 +35,7 @@ if [ ! -z ${INPUT_PREVIOUS_FILENAME} ]; then
 fi
 
 # Required to have slack webhook in environment
-if [ -z ${SLACK_WEBHOOK+x} ]; then 
+if [ -z ${SLACK_WEBHOOK+x} ]; then
     printf "Warning, SLACK_WEBHOOK not found, will not deploy to slack.\n"
 fi
 
@@ -53,22 +53,32 @@ fi
 
 # If everything not unset and deploy twitter is true, we deploy!
 DEPLOY_TWITTER=false
-if [ ! -z ${TWITTER_API_KEY+x} ] && [ ! -z ${TWITTER_API_SECRET+x} ] && [ ! -z ${TWITTER_CONSUMER_KEY+x} ] && [ ! -z ${TWITTER_CONSUMER_SECRET+x} ] && [[ "${TWITTER_DEPLOY}" == "true" ]]; then 
+if [ ! -z ${TWITTER_API_KEY+x} ] && [ ! -z ${TWITTER_API_SECRET+x} ] && [ ! -z ${TWITTER_CONSUMER_KEY+x} ] && [ ! -z ${TWITTER_CONSUMER_SECRET+x} ] && [[ "${TWITTER_DEPLOY}" == "true" ]]; then
     DEPLOY_TWITTER=true
 fi
 
+# likewise for mastodon
+DEPLOY_MASTODON=false
+if [ ! -z ${MASTODON_ACCESS_TOKEN+x} ] && [ ! -z ${MASTODON_API_BASE_URL+x} ] && [[ "${MASTODON_DEPLOY}" == "true" ]]; then
+    DEPLOY_MASTODON=true
+fi
+
+COMMAND="python ${ACTION_DIR}/find-updates.py update --keys ${INPUT_KEYS} --unique ${INPUT_UNIQUE} --original ${JOBFILE} --updated ${INPUT_FILENAME}"
+
 if [[ "${DEPLOY}" == "true" ]]; then
-  COMMAND="python ${ACTION_DIR}/find-updates.py update --keys ${INPUT_KEYS} --unique ${INPUT_UNIQUE} --original ${JOBFILE} --updated ${INPUT_FILENAME} --deploy"
-else
-  COMMAND="python ${ACTION_DIR}/find-updates.py update --keys ${INPUT_KEYS} --unique ${INPUT_UNIQUE} --original ${JOBFILE} --updated ${INPUT_FILENAME}"
+  COMMAND="${COMMAND} --deploy"
 fi
 
 if [[ "${INPUT_TEST}" == "true" ]]; then
-  COMMAND="$COMMAND --test"
+  COMMAND="${COMMAND} --test"
 fi
 
 if [[ "${DEPLOY_TWITTER}" == "true" ]]; then
-  COMMAND="$COMMAND --deploy-twitter"
+  COMMAND="${COMMAND} --deploy-twitter"
+fi
+
+if [[ "${DEPLOY_MASTODON}" == "true" ]]; then
+  COMMAND="${COMMAND} --deploy-mastodon"
 fi
 
 echo "${COMMAND}"

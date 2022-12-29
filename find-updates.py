@@ -3,7 +3,9 @@
 # This script does the following.
 # 1. Reads in a current and changed yaml file
 # 2. Finds changes between the two
-# 3. Post them to slack and/or Twitter
+# 3. Post them to slack
+# 4. Optionally post them to Twitter
+# 5. Optionally post them to Mastodon
 
 import argparse
 import requests
@@ -13,7 +15,7 @@ import os
 import sys
 import yaml
 import tweepy
-
+from mastodon import Mastodon
 
 def read_yaml(filename):
     with open(filename, "r") as stream:
@@ -24,6 +26,21 @@ def read_yaml(filename):
 def write_file(content, filename):
     with open(filename, "w") as fd:
         fd.write(content)
+
+def set_env_and_output(name, value):
+    """
+    helper function to echo a key/value pair to the environement file
+
+    Parameters:
+    name (str)  : the name of the environment variable
+    value (str) : the value to write to file
+    """
+    for env_var in ("GITHUB_ENV", "GITHUB_OUTPUT"):
+        environment_file_path = os.environ.get(env_var)
+        print("Writing %s=%s to %s" % (name, value, env_var))
+
+        with open(environment_file_path, "a") as environment_file:
+            environment_file.write("%s=%s\n" % (name, value))
 
 
 def get_parser():
@@ -59,7 +76,15 @@ def get_parser():
         dest="deploy_twitter",
         action="store_true",
         default=False,
-        help="deploy to Twitter (required api token/secret, and consumer token/secret",
+        help="deploy to Twitter (required api token/secret, and consumer token/secret)",
+    )
+
+    update.add_argument(
+        "--deploy-mastodon",
+        dest="deploy_mastodon",
+        action="store_true",
+        default=False,
+        help="deploy to Mastodon (required access token, and API base URL)",
     )
 
     update.add_argument(
@@ -114,6 +139,21 @@ def get_twitter_client():
         access_token_secret=envars["TWITTER_API_SECRET"],
     )
 
+def get_mastodon_client():
+    envars = {}
+    for envar in [
+        "MASTODON_ACCESS_TOKEN",
+        "MASTODON_API_BASE_URL",
+    ]:
+        value = os.environ.get(envar)
+        if not value:
+            sys.exit("%s is not set, and required when mastodon deploy is true!" % envar)
+        envars[envar] = value
+
+    return Mastodon(
+        access_token=envars["MASTODON_ACCESS_TOKEN"],
+        api_base_url=envars["MASTODON_API_BASE_URL"],
+    )
 
 def prepare_post(entry, keys):
     """Prepare the slack or tweet. There should be a descriptor for
@@ -145,10 +185,14 @@ def main():
         if not os.path.exists(filename):
             sys.exit(f"{filename} does not exist.")
 
-    # Cut out early if we are deploying to twitter but missing envars
+    # Cut out early if we are deploying to twitter or mastodon but missing envars
     client = None
     if args.deploy_twitter:
         client = get_twitter_client()
+
+    mastodon_client = None
+    if args.deploy_mastodon:
+        mastodon_client = get_mastodon_client()
 
     original = read_yaml(args.original)
     updated = read_yaml(args.updated)
@@ -178,9 +222,9 @@ def main():
         new = entries
     elif not new:
         print("No new jobs found.")
-        print("::set-output name=fields::[]")
-        print("::set-output name=empty_matrix::true")
-        print("::set-output name=matrix::[]")
+        set_env_and_output("fields", "[]")
+        set_env_and_output("matrix", "[]")
+        set_env_and_output("empty_matrix", "true")
         sys.exit(0)
 
     # Prepare the data
@@ -240,6 +284,11 @@ def main():
             except Exception as e:
                 print("Issue posting tweet: %s, and length is %s" % (e, len(message)))
 
+        # If we are instructed to deploy to mastodon and have a client
+        if args.deploy_mastodon and mastodon_client:
+            message = "New #RSEng Job! %s: %s" % (choice, post)
+            mastodon_client.toot(status=message)
+
         # Don't continue if testing
         if not args.deploy or args.test:
             continue
@@ -252,9 +301,9 @@ def main():
                 % (response.reason, response.status_code)
             )
 
-    print("::set-output name=fields::%s" % json.dumps(keys))
-    print("::set-output name=matrix::%s" % json.dumps(matrix))
-    print("::set-output name=empty_matrix::false")
+    set_env_and_output("fields", json.dumps(keys))
+    set_env_and_output("matrix", json.dumps(matrix))
+    set_env_and_output("empty_matrix", "false")
     print("matrix: %s" % json.dumps(matrix))
     print("group: %s" % new)
 

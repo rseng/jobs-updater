@@ -3,7 +3,7 @@ description: "The jobs updater will respond on some trigger, and them parse a jo
 inputs:
   filename:
     description: the filename for the jobs
-    required: true    
+    required: true
   previous_filename:
     description: the previous filename (usually only for manual tesing)
     required: false
@@ -44,6 +44,17 @@ inputs:
     description: consumer secret generated for the entire app
     required: false
 
+# If you want to post to Mastodon, these values are required
+  mastodon_deploy:
+    description: Boolean to deploy to Mastodon
+    required: false
+  mastodon_access_token:
+    description: API key generated for the user account to tweet
+    required: false
+  mastodon_api_base_url:
+    description: Base URL of the Mastodon instance to post to, e.g., https://fosstodon.org/
+    required: false
+
 outputs:
   fields:
     description: Fields (keys) parsed
@@ -51,16 +62,16 @@ outputs:
   matrix:
     description: Matrix (list of lists) with value (index 1), icon (index 2) and full message (index 3)
     value: ${{ steps.jobs-updater.outputs.matrix }}
-  empty_matrix: 
+  empty_matrix:
     description: true if empty, false otherwise
     value: ${{ steps.jobs-updated.outputs.empty_matrix }}
-    
+
 runs:
   using: "composite"
   steps:
     - name: Install Python Dependencies
       run: |
-          pip install pyyaml requests
+          pip install pyyaml requests Mastodon.py
           pip install git+https://github.com/tweepy/tweepy.git
       shell: bash
 
@@ -81,5 +92,8 @@ runs:
         TWITTER_API_SECRET: ${{ inputs.twitter_api_secret }}
         TWITTER_CONSUMER_KEY: ${{ inputs.twitter_consumer_key }}
         TWITTER_CONSUMER_SECRET: ${{ inputs.twitter_consumer_secret }}
+        MASTODON_DEPLOY: ${{ inputs.mastodon_deploy }}
+        MASTODON_ACCESS_TOKEN: ${{ inputs.mastodon_access_token }}
+        MASTODON_API_BASE_URL: ${{ inputs.mastodon_api_base_url }}
       run: ${{ github.action_path }}/entrypoint.sh
       shell: bash
