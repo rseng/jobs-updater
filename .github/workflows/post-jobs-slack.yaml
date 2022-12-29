@@ -22,7 +22,7 @@ jobs:
           unique: "url"
 
           deploy: false
-          test: false
+          test: true
 
           # Also deploy to Mastodon (all secrets required in repository secrets)
           mastodon_deploy: true
