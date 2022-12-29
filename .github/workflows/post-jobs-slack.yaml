@@ -25,7 +25,7 @@ jobs:
           test: true
 
           # Also deploy to Mastodon (all secrets required in repository secrets)
-          mastodon_deploy: true
+          mastodon_deploy: false
           mastodon_access_token: ${{ secrets.MASTODON_ACCESS_TOKEN }}
           mastodon_api_base_url: ${{ secrets.MASTODON_API_BASE_URL }}
 
