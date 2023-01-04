@@ -29,7 +29,7 @@ def write_file(content, filename):
 
 def set_env_and_output(name, value):
     """
-    helper function to echo a key/value pair to the environement file
+    helper function to echo a key/value pair to the environment file
 
     Parameters:
     name (str)  : the name of the environment variable
