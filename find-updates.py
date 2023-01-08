@@ -240,10 +240,10 @@ def deploy_discord(webhook, message):
     response = requests.post(webhook, headers=headers, data=json.dumps(data))
     if response.status_code not in [200, 201]:
         print(response)
-        sys.exit(
-            "Issue with making Discord POST request: %s, %s"
-            % (response.reason, response.status_code)
-        )
+        #sys.exit(
+        #    "Issue with making Discord POST request: %s, %s"
+        #    % (response.reason, response.status_code)
+        #)
 
 
 def deploy_twitter(client, message):
