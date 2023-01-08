@@ -4,7 +4,7 @@ on:
 jobs:
   slack-poster:
     runs-on: ubuntu-latest
-    name: Run Jobs Slack Poster
+    name: Run Jobs Test Poster
     steps:
       - uses: actions/checkout@v3
         with:
@@ -13,14 +13,11 @@ jobs:
       - id: updater
         name: Job Updater
         uses: ./
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         with:
           filename: "example/jobs.yaml"
           previous_filename: "example/jobs-previous.yaml"
           keys: "url"
           unique: "url"
-
           deploy: false
           test: true
 
@@ -28,14 +25,11 @@ jobs:
       - id: multifield_updater
         name: Job Updater
         uses: ./
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         with:
           filename: "example/jobs.yaml"
           previous_filename: "example/jobs-previous.yaml"
           keys: "name,location,url"
           unique: "url"
-
           deploy: false
           test: true
 
