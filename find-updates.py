@@ -17,15 +17,27 @@ import yaml
 import tweepy
 from mastodon import Mastodon
 
+# Shared headers for slack / discord
+headers = {"Content-type": "application/json"}
+success_codes = [200, 201, 204]
+
+
 def read_yaml(filename):
+    """
+    Read yaml from file.
+    """
     with open(filename, "r") as stream:
         content = yaml.load(stream, Loader=yaml.FullLoader)
     return content
 
 
 def write_file(content, filename):
+    """
+    Write yaml to file.
+    """
     with open(filename, "w") as fd:
         fd.write(content)
+
 
 def set_env_and_output(name, value):
     """
@@ -72,11 +84,34 @@ def get_parser():
     )
 
     update.add_argument(
+        "--hashtag",
+        dest="hashtag",
+        default="#RSEng",
+        help="A hashtag (starting with #) to include in the post, defaults to #RSEng",
+    )
+
+    update.add_argument(
         "--deploy-twitter",
         dest="deploy_twitter",
         action="store_true",
         default=False,
         help="deploy to Twitter (required api token/secret, and consumer token/secret)",
+    )
+
+    update.add_argument(
+        "--deploy-slack",
+        dest="deploy_slack",
+        action="store_true",
+        default=False,
+        help="deploy to Slack (required webhook URL in environment)",
+    )
+
+    update.add_argument(
+        "--deploy-discord",
+        dest="deploy_discord",
+        action="store_true",
+        default=False,
+        help="deploy to Discord (required webhook URL in environment)",
     )
 
     update.add_argument(
@@ -119,19 +154,32 @@ def get_parser():
     return parser
 
 
-def get_twitter_client():
+def get_required_envars(required, client_name):
+    """
+    Get and return a set of required environment variables.
+    """
     envars = {}
-    for envar in [
+    for envar in required:
+        value = os.environ.get(envar)
+        if not value:
+            sys.exit(
+                f"{envar} is not set, and required when {client_name} deploy is true!"
+            )
+        envars[envar] = value
+    return envars
+
+
+def get_twitter_client():
+    """
+    Get a Twitter client, also ensure all needed envars are provided.
+    """
+    required = [
         "TWITTER_API_KEY",
         "TWITTER_API_SECRET",
         "TWITTER_CONSUMER_KEY",
         "TWITTER_CONSUMER_SECRET",
-    ]:
-        value = os.environ.get(envar)
-        if not value:
-            sys.exit("%s is not set, and required when twitter deploy is true!" % envar)
-        envars[envar] = value
-
+    ]
+    envars = get_required_envars(required, "twitter")
     return tweepy.Client(
         consumer_key=envars["TWITTER_CONSUMER_KEY"],
         consumer_secret=envars["TWITTER_CONSUMER_SECRET"],
@@ -139,25 +187,27 @@ def get_twitter_client():
         access_token_secret=envars["TWITTER_API_SECRET"],
     )
 
+
 def get_mastodon_client():
-    envars = {}
-    for envar in [
+    """
+    Get a Mastodon client, requiring a token and base URL.
+    """
+    required = [
         "MASTODON_ACCESS_TOKEN",
         "MASTODON_API_BASE_URL",
-    ]:
-        value = os.environ.get(envar)
-        if not value:
-            sys.exit("%s is not set, and required when mastodon deploy is true!" % envar)
-        envars[envar] = value
-
+    ]
+    envars = get_required_envars(required, "mastodon")
     return Mastodon(
         access_token=envars["MASTODON_ACCESS_TOKEN"],
         api_base_url=envars["MASTODON_API_BASE_URL"],
     )
 
+
 def prepare_post(entry, keys):
-    """Prepare the slack or tweet. There should be a descriptor for
-    all fields except for url.
+    """
+    Prepare the post.
+
+    There should be a descriptor for all fields except for url.
     """
     post = ""
     for key in keys:
@@ -167,6 +217,46 @@ def prepare_post(entry, keys):
             else:
                 post = post + key.capitalize() + ": " + entry[key] + "\n"
     return post
+
+
+def deploy_slack(webhook, message):
+    """
+    Deploy a post to slack
+    """
+    data = {"text": message, "unfurl_links": True}
+    response = requests.post(webhook, headers=headers, data=json.dumps(data))
+    if response.status_code not in success_codes:
+        print(response)
+        sys.exit(
+            "Issue with making Slack POST request: %s, %s"
+            % (response.reason, response.status_code)
+        )
+
+
+def deploy_discord(webhook, message):
+    """
+    Deploy a post to Discord
+    """
+    data = {"content": message}
+    response = requests.post(webhook, headers=headers, data=json.dumps(data))
+    if response.status_code not in success_codes:
+        print(response)
+        sys.exit(
+            "Issue with making Discord POST request: %s, %s"
+            % (response.reason, response.status_code)
+        )
+
+
+def deploy_twitter(client, message):
+    """
+    Deploy to Twitter.
+
+    Twitter supports emojis, so we add them back.
+    """
+    try:
+        client.create_tweet(text=message)
+    except Exception as e:
+        print(f"Issue posting tweet: {e}, and length is {len(message)}")
 
 
 def main():
@@ -185,15 +275,20 @@ def main():
         if not os.path.exists(filename):
             sys.exit(f"{filename} does not exist.")
 
-    # Cut out early if we are deploying to twitter or mastodon but missing envars
-    client = None
+    # Deploying to Twitter?
+    twitter_client = None
     if args.deploy_twitter:
-        client = get_twitter_client()
+        twitter_client = get_twitter_client()
 
     mastodon_client = None
     if args.deploy_mastodon:
         mastodon_client = get_mastodon_client()
 
+    # Prepare webhooks for slack and mastodon
+    slack_webhook = os.environ.get("SLACK_WEBHOOK")
+    discord_webhook = os.environ.get("DISCORD_WEBHOOK")
+
+    # Get original and updated jobs
     original = read_yaml(args.original)
     updated = read_yaml(args.updated)
 
@@ -202,9 +297,16 @@ def main():
 
     # Find new posts in updated
     previous = set()
+    missing_count = 0
     for item in original:
         if args.unique in item:
             previous.add(item[args.unique])
+        else:
+            missing_count += 1
+
+    # Warn the user if some are missing the unique key
+    if missing_count:
+        print(f"Warning: key {args.unique} is missing in {missing_count} items.")
 
     # Create a lookup by the unique id
     new = []
@@ -227,12 +329,6 @@ def main():
         set_env_and_output("empty_matrix", "true")
         sys.exit(0)
 
-    # Prepare the data
-    webhook = os.environ.get("SLACK_WEBHOOK")
-    if not webhook and args.deploy:
-        sys.exit("Cannot find SLACK_WEBHOOK in environment.")
-
-    headers = {"Content-type": "application/json"}
     matrix = []
 
     # Format into slack messages
@@ -243,6 +339,7 @@ def main():
         "👀️",
         "✨️",
         "🤖️",
+        "😎️",
         "💼️",
         "🤩️",
         "😸️",
@@ -257,9 +354,9 @@ def main():
 
         # Prepare the post
         post = prepare_post(entry, keys)
-
         choice = random.choice(icons)
-        message = "New Job! %s\n%s" % (choice, post)
+        message = f"New {args.hashtag} Job! {choice}: {post}"
+        newline_message = f"New {args.hashtag} Job! {choice}\n{post}"
         print(message)
 
         # Convert dates, etc. back to string
@@ -271,35 +368,28 @@ def main():
                 continue
 
         # Add the job name to the matrix
-        # IMPORTANT: emojis in output mess up the action
+        # IMPORTANT: emojis in output can mess up some of the services
         matrix.append(filtered)
-        data = {"text": message, "unfurl_links": True}
+
+        # Don't continue if testing or global deploy is false
+        if not args.deploy or args.test is True:
+            continue
 
         # If we are instructed to deploy to twitter and have a client
-        if args.deploy_twitter and client:
-            message = "New #RSEng Job! %s\n%s" % (choice, post)
-            print(message)
-            try:
-                client.create_tweet(text=message)
-            except Exception as e:
-                print("Issue posting tweet: %s, and length is %s" % (e, len(message)))
+        if args.deploy_twitter and twitter_client:
+            deploy_twitter(twitter_client, newline_message)
 
         # If we are instructed to deploy to mastodon and have a client
         if args.deploy_mastodon and mastodon_client:
-            message = "New #RSEng Job! %s: %s" % (choice, post)
             mastodon_client.toot(status=message)
 
-        # Don't continue if testing
-        if not args.deploy or args.test:
-            continue
+        # Deploy to Slack
+        if slack_webhook is not None and args.deploy_slack:
+            deploy_slack(slack_webhook, message)
 
-        response = requests.post(webhook, headers=headers, data=json.dumps(data))
-        if response.status_code not in [200, 201]:
-            print(response)
-            sys.exit(
-                "Issue with making POST request: %s, %s"
-                % (response.reason, response.status_code)
-            )
+        # Deploy to Discord
+        if discord_webhook is not None and args.deploy_discord:
+            deploy_discord(discord_webhook, message)
 
     set_env_and_output("fields", json.dumps(keys))
     set_env_and_output("matrix", json.dumps(matrix))

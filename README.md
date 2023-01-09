@@ -9,22 +9,28 @@ and a yaml file with a list of jobs (or other links):
   url: https://my-job.org/12345
 ```
 
-The action will inspect the file to determine lines that are newly added (compared to the parent commit)
-for a field of interest (e.g., the "url" attribute in a list of jobs), extract this field, and then post to a Slack channel.
+The action will inspect the file to determine lines that are newly added (compared to a parent commit or second file)
+for a field of interest (e.g., the "url" attribute in a list of jobs), extract this field, and then post to a Slack channel,
+a Discord Channel, Twitter, or Mastodon.
 
 ![img/example.png](img/example.png)
 
-This is custom made to help the [US-RSE](https://github.com/US-RSE/usrse.github.io) site
-to have job updates posted to slack!
+This is custom made to help the [hpc.social](https://hpc.social/jobs) and [US-RSE](https://github.com/US-RSE/usrse.github.io) site
+to have job updates posted to slack! If you'd like help setting this up for your group, please
+ping [@vsoch](https://github.com/vsoch).
 
-## Quickstart
 
-1. Create a [webhook app](https://api.slack.com/messaging/webhooks#getting_started) and grab the URL and save to `SLACK_WEBHOOK` in your repository secrets.
+## Usage
+
+You'll generally want to:
+
+1. Generate needed credentials for your apps of choice.
 2. Add a GitHub workflow file, as shown below, with your desired triggers.
 
-For more details on the above, keep reading.
+More specifically, add a GitHub workflow file in `.github/workflows` to specify the following. Note that
+the workflow below will do the check and update on any push to main (e.g., a merged pull request).
 
-## 1. Slack Setup
+### Deploy to Slack
 
 You'll want to [follow the instructions here](https://api.slack.com/messaging/webhooks#getting_started) to create a webhook
 for your slack community and channel of interest. This usually means first creating an application and selecting your slack
@@ -39,21 +45,13 @@ curl -X POST -H 'Content-type: application/json' --data '{"text":"Hello, World!"
 ```
 
 Click on "Add new webhook to workspace" and then test the provided url with the bot. Copy the webhook URL
-and put it in a safe place. We will want to keep this URL as a secret in our eventual GitHub workflow.
-
-
-## 2. Usage
-
-Add a GitHub workflow file in `.github/workflows` to specify the following. Note that
-the workflow below will do the check and update on any push to main (e.g., a merged pull request).
-
-### Deploy to Slack
+and save this to `SLACK_WEBHOOK` in your repository secrets.
 
 ```yaml
 on:
   push:
     paths:
-      - '_data/jobs.yml'
+      - '_data/jobs.yaml'
     branches:
       - main
 
@@ -69,12 +67,12 @@ jobs:
       - id: updater
         name: Job Updater
         uses: rseng/jobs-updater@main
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         with:
-          filename: "_data/jobs.yml"
+          filename: "_data/jobs.yaml"
           keys: "url,name"
           unique: "url"
+          slack_webhook: ${{ secrets.SLACK_WEBHOOK }}
+          slack_deploy: true
 
       - run: echo ${{ steps.updater.outputs.fields }}
         name: Show New Jobs
@@ -82,20 +80,20 @@ jobs:
 ```
 
 In the above, we will include the url and name fields, and use the url field to determine uniqueness (default).
-By default, given that you have the slack webhook in the environment, deployment will
-happen because deploy is true. If you just want to test, then do:
+Given that you have the slack webhook as a secret provided to the action and `deploy_slack` is true, the default `deploy`
+variable (to indicate all services) is true and deployment will happen. If you just want to test, then do:
 
 ```yaml
 ...
       - id: updater
         name: Job Updater
         uses: rseng/jobs-updater@main
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         with:
-          filename: "_data/jobs.yml"
+          filename: "_data/jobs.yaml"
           keys: "url"
           deploy: false
+          slack_webhook: ${{ secrets.SLACK_WEBHOOK }}
+          slack_deploy: true
 ```
 
 If you want to run a test run (meaning a random number of jobs will be selected that
@@ -106,12 +104,11 @@ aren't necessarily new) then add test:
       - id: updater
         name: Job Updater
         uses: rseng/jobs-updater@main
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         with:
-          filename: "_data/jobs.yml"
+          filename: "_data/jobs.yaml"
           keys: "url"
           test: true
+          slack_deploy: true
 ```
 
 If test is true, deploy will always be set to false.
@@ -123,17 +120,15 @@ to true, and also define all the needed environment variables in your repository
 secrets.
 
 ```yaml
+...
       - id: updater
         name: Job Updater
         uses: rseng/jobs-updater@add/deploy-arg
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         with:
-          filename: "_data/jobs.yml"
+          filename: "_data/jobs.yaml"
           keys: "url,name"
-
-          deploy: true
           test: false
+          slack_deploy: true
 
           # Also deploy to Twitter (all secrets required in repository secrets)
           twitter_deploy: true
@@ -153,13 +148,9 @@ secrets.
       - id: updater
         name: Job Updater
         uses: rseng/jobs-updater@main
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         with:
-          filename: "_data/jobs.yml"
+          filename: "_data/jobs.yaml"
           key: "url"
-
-          deploy: true
           test: false
 
           # Also deploy to Mastodon (all secrets required in repository secrets)
@@ -175,3 +166,56 @@ secrets.
           mastodon_access_token: ${{ secrets.MASTODON_ACCESS_TOKEN }}
           mastodon_api_base_url: ${{ secrets.MASTODON_API_BASE_URL }}
 ```
+
+### Deploy to Discord
+
+To deploy to Discord you will need to [create a webhook](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks) 
+and then set `deploy_discord` to true, along with adding the webhook to your repository secrets as `DISCORD_WEBHOOK`.
+
+```yaml
+      - id: updater
+        name: Job Updater
+        uses: rseng/jobs-updater@main
+        with:
+          filename: "_data/jobs.yaml"
+          key: "url"
+          test: false
+          discord_deploy: true
+          discord_webhook: ${{ secrets.DISCORD_WEBHOOK }}
+```
+
+## Variables
+
+### Inputs 
+
+The following variables are available. You can also look at the [action.yml](action.yml).
+
+| Name | Description | Required | Default |
+|------|-------------|----------|---------|
+| filename | The filename for the jobs | true | unset |
+| previous_filename | The previous filename (for manual tesing or running alongside update) | false | unset |
+| keys | Comma separated list of keys to post (defaults to url) | false | url |
+| unique | Field to use to determine uniqueness | true | url |
+| hashtag | A hashtag to use (defaults to `#Rseng`) | false | #RSEng |
+| test |  Test the updater (ensure there are jobs) | true | false |
+| deploy | Global deploy across any service set to true? | true | true |
+| slack_deploy | Deploy to Slack? | true | false |
+| slack_webhook | Slack webhook to deploy to. | false | unset |
+| discord_deploy | Deploy to Discord? | true | false |
+| discord_webhook | Discord webhook to deploy to. | false | unset |
+| twitter_deploy | Deploy to Twitter? | false | unset |
+| twitter_api_key | API key generated for the user account to tweet | false | unset |
+| twitter_api_secret |API secret generated for the user account to tweet | false | unset |
+| twitter_consumer_key | Consumer key generated for the entire app | false | unset |
+| twitter_consumer_secret | Consumer secret generated for the entire app | false | unset |
+| mastodon_deploy | Boolean to deploy to Mastodon | false | unset |
+| mastodon_access_token | API key generated for the user account to tweet | false | unset |
+| mastodon_api_base_url | Base URL of the Mastodon instance to post to, e.g., https://fosstodon.org/ | false | unset |
+
+### Outputs
+
+| Name | Description |
+|------|-------------|
+| Fields (keys) parsed | The fields that are parsed in the jobs |
+| Matrix | Matrix (list of lists) with value (index 1), icon (index 2) and full message (index 3) |
+| Empty Matrix | true if empty, false otherwise |
