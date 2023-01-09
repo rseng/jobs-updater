@@ -19,6 +19,7 @@ from mastodon import Mastodon
 
 # Shared headers for slack / discord
 headers = {"Content-type": "application/json"}
+success_codes = [200, 201, 204]
 
 
 def read_yaml(filename):
@@ -224,7 +225,7 @@ def deploy_slack(webhook, message):
     """
     data = {"text": message, "unfurl_links": True}
     response = requests.post(webhook, headers=headers, data=json.dumps(data))
-    if response.status_code not in [200, 201]:
+    if response.status_code not in success_codes:
         print(response)
         sys.exit(
             "Issue with making Slack POST request: %s, %s"
@@ -238,12 +239,12 @@ def deploy_discord(webhook, message):
     """
     data = {"content": message}
     response = requests.post(webhook, headers=headers, data=json.dumps(data))
-    if response.status_code not in [200, 201]:
+    if response.status_code not in success_codes:
         print(response)
-        #sys.exit(
-        #    "Issue with making Discord POST request: %s, %s"
-        #    % (response.reason, response.status_code)
-        #)
+        sys.exit(
+            "Issue with making Discord POST request: %s, %s"
+            % (response.reason, response.status_code)
+        )
 
 
 def deploy_twitter(client, message):
