@@ -1,5 +1,5 @@
 name: 'Jobs Updater'
-description: "The jobs updater will respond on some trigger, and them parse a jobs file for changes, posting to one or more services."
+description: "Respond on a trigger and parse a jobs file for changes, posting to one or more services."
 inputs:
   filename:
     description: the filename for the jobs
@@ -35,6 +35,7 @@ inputs:
   slack_webhook:
     description: Slack webhook to deploy to.
     required: false
+
   discord_deploy:
     description: Deploy to Discord?
     required: true
@@ -43,8 +44,18 @@ inputs:
     description: Discord webhook to deploy to.
     required: false
 
-# If you want to post to Twitter, all of these credentials are required for a specific user
+  # If you want to post to BlueSky, both of these are required
+  bluesky_deploy:
+    description: Boolean to deploy to BlueSky
+    required: false
+  bluesky_password:
+    description: BlueSky account password
+    required: false
+  bluesky_email:
+    description: BlueSky account email
+    required: false
 
+  # If you want to post to Twitter, all of these credentials are required for a specific user
   # API keys are typically generated on behalf of a user (at the bottom of the interface)
   twitter_deploy:
     description: Deploy to Twitter?
@@ -64,7 +75,7 @@ inputs:
     description: consumer secret generated for the entire app
     required: false
 
-# If you want to post to Mastodon, these values are required
+  # If you want to post to Mastodon, these values are required
   mastodon_deploy:
     description: Boolean to deploy to Mastodon
     required: false
@@ -91,7 +102,7 @@ runs:
   steps:
     - name: Install Python Dependencies
       run: |
-          pip install pyyaml requests Mastodon.py
+          pip install pyyaml requests Mastodon.py atproto
           pip install git+https://github.com/tweepy/tweepy.git
       shell: bash
 
@@ -110,6 +121,9 @@ runs:
         INPUT_DEPLOY: ${{ inputs.deploy }}
         SLACK_DEPLOY: ${{ inputs.slack_deploy }}
         SLACK_WEBHOOK: ${{ inputs.slack_webhook }}
+        BLUESKY_DEPLOY: ${{ inputs.bluesky_deploy }}
+        BLUESKY_PASSWORD: ${{ inputs.bluesky_password }}
+        BLUESKY_EMAIL: ${{ inputs.bluesky_email }}
         TWITTER_DEPLOY: ${{ inputs.twitter_deploy }}
         TWITTER_API_KEY: ${{ inputs.twitter_api_key }}
         TWITTER_API_SECRET: ${{ inputs.twitter_api_secret }}

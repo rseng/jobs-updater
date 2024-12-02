@@ -47,6 +47,11 @@ if [[ "${INPUT_TEST}" == "true" ]]; then
     DEPLOY=false
 fi
 
+DEPLOY_BLUESKY=false
+if [ ! -z ${BLUESKY_EMAIL+x} ] && [ ! -z ${BLUESKY_PASSWORD+x} ] && [[ "${BLUESKY_DEPLOY}" == "true" ]]; then
+    DEPLOY_BLUESKY=true
+fi
+
 # If everything not unset and deploy twitter is true, we deploy!
 DEPLOY_TWITTER=false
 if [ ! -z ${TWITTER_API_KEY+x} ] && [ ! -z ${TWITTER_API_SECRET+x} ] && [ ! -z ${TWITTER_CONSUMER_KEY+x} ] && [ ! -z ${TWITTER_CONSUMER_SECRET+x} ] && [[ "${TWITTER_DEPLOY}" == "true" ]]; then
@@ -74,6 +79,7 @@ fi
 # Alert the user everything that will happen
 printf "  Global Deploy: ${DEPLOY}\n"
 printf "Deploy Mastodon: ${DEPLOY_MASTODON}\n"
+printf " Deploy BlueSky: ${DEPLOY_BLUESKY}\n"
 printf " Deploy Twitter: ${DEPLOY_TWITTER}\n"
 printf " Deploy Discord: ${DEPLOY_DISCORD}\n"
 printf "   Deploy Slack: ${DEPLOY_SLACK}\n"
@@ -109,6 +115,10 @@ fi
 
 if [[ "${DEPLOY_DISCORD}" == "true" ]]; then
     COMMAND="${COMMAND} --deploy-discord"
+fi
+
+if [[ "${DEPLOY_BLUESKY}" == "true" ]]; then
+    COMMAND="${COMMAND} --deploy-bluesky"
 fi
 
 echo "${COMMAND}"
