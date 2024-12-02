@@ -21,7 +21,6 @@ jobs:
           deploy: false
           test: true
 
-
       - id: multifield_updater
         name: Job Updater
         uses: ./

@@ -4,22 +4,46 @@
 # 1. Reads in a current and changed yaml file
 # 2. Finds changes between the two
 # 3. Post them to slack
-# 4. Optionally post them to Twitter
-# 5. Optionally post them to Mastodon
+# 4. Optionally post them to Twitter, Mastodon, Discord, etc.
 
 import argparse
-import requests
-import random
 import json
 import os
+import random
 import sys
-import yaml
+
+import requests
 import tweepy
+import yaml
+from atproto import Client as BlueskyClient
+from atproto import client_utils
 from mastodon import Mastodon
 
 # Shared headers for slack / discord
 headers = {"Content-type": "application/json"}
 success_codes = [200, 201, 204]
+
+
+icons = [
+    "⭐️",
+    "😍️",
+    "❤️",
+    "👀️",
+    "✨️",
+    "🤖️",
+    "😎️",
+    "💼️",
+    "🤩️",
+    "🥑",
+    "🥳",
+    "🎉",
+    "😸️",
+    "😻️",
+    "👉️",
+    "🕶️",
+    "🔥️",
+    "💻️",
+]
 
 
 def read_yaml(filename):
@@ -115,6 +139,14 @@ def get_parser():
     )
 
     update.add_argument(
+        "--deploy-bluesky",
+        dest="deploy_bluesky",
+        action="store_true",
+        default=False,
+        help="deploy to BlueSky (required user/pass in environment)",
+    )
+
+    update.add_argument(
         "--deploy-mastodon",
         dest="deploy_mastodon",
         action="store_true",
@@ -188,6 +220,20 @@ def get_twitter_client():
     )
 
 
+def get_bluesky_client():
+    """
+    Get a BlueSky (atproto) client, also ensure all needed envars are provided.
+    """
+    required = [
+        "BLUESKY_PASSWORD",
+        "BLUESKY_EMAIL",
+    ]
+    client = BlueskyClient()
+    envars = get_required_envars(required, "bluesky")
+    client.login(envars["BLUESKY_EMAIL"], envars["BLUESKY_PASSWORD"])
+    return client
+
+
 def get_mastodon_client():
     """
     Get a Mastodon client, requiring a token and base URL.
@@ -203,7 +249,7 @@ def get_mastodon_client():
     )
 
 
-def prepare_post(entry, keys):
+def prepare_post(entry, keys, without_url=False):
     """
     Prepare the post.
 
@@ -212,6 +258,9 @@ def prepare_post(entry, keys):
     post = ""
     for key in keys:
         if key in entry:
+            # For BlueSky, we include the url separately
+            if key == "url" and without_url:
+                continue
             if key == "url":
                 post = post + entry[key] + "\n"
             else:
@@ -231,6 +280,25 @@ def deploy_slack(webhook, message):
             "Issue with making Slack POST request: %s, %s"
             % (response.reason, response.status_code)
         )
+
+
+def deploy_bluesky(client, entry, hashtag):
+    """
+    Deploy to bluesky. We add the job link separately.
+    """
+    tb = client_utils.TextBuilder()
+
+    # Prepare the post, but without the url
+    post = prepare_post(entry, keys, without_url=True)
+    choice = random.choice(icons)
+    message = f"New {hashtag} Job! {choice}\n{post}"
+    print(message)
+
+    # Add the text to the textbuilder
+    tb.text(message)
+    tb.link("CBOR", entry["url"])
+    response = client.send_post(tb)
+    print(f"Posted to bluesky {response.uri}: {response.cid}")
 
 
 def deploy_discord(webhook, message):
@@ -284,6 +352,11 @@ def main():
     if args.deploy_mastodon:
         mastodon_client = get_mastodon_client()
 
+    # Deploying to BlueSky?
+    bluesky_client = None
+    if args.deploy_bluesky:
+        bluesky_client = get_bluesky_client()
+
     # Prepare webhooks for slack and mastodon
     slack_webhook = os.environ.get("SLACK_WEBHOOK")
     discord_webhook = os.environ.get("DISCORD_WEBHOOK")
@@ -331,27 +404,7 @@ def main():
 
     matrix = []
 
-    # Format into slack messages
-    icons = [
-        "⭐️",
-        "😍️",
-        "❤️",
-        "👀️",
-        "✨️",
-        "🤖️",
-        "😎️",
-        "💼️",
-        "🤩️",
-        "😸️",
-        "😻️",
-        "👉️",
-        "🕶️",
-        "🔥️",
-        "💻️",
-    ]
-
     for entry in new:
-
         # Prepare the post
         post = prepare_post(entry, keys)
         choice = random.choice(icons)
@@ -378,6 +431,9 @@ def main():
         # If we are instructed to deploy to twitter and have a client
         if args.deploy_twitter and twitter_client:
             deploy_twitter(twitter_client, newline_message)
+
+        if args.deploy_bluesky and bluesky_client:
+            deploy_bluesky(bluesky_client, entry, args.hashtag)
 
         # If we are instructed to deploy to mastodon and have a client
         if args.deploy_mastodon and mastodon_client:

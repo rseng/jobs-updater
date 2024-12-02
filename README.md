@@ -3,7 +3,7 @@
 The jobs updater is a simple GitHub action application to, given some trigger
 and a yaml file with a list of jobs (or other links):
 
-```
+```console
 - name: My Job
   ...
   url: https://my-job.org/12345
@@ -80,7 +80,7 @@ jobs:
 ```
 
 In the above, we will include the url and name fields, and use the url field to determine uniqueness (default).
-Given that you have the slack webhook as a secret provided to the action and `deploy_slack` is true, the default `deploy`
+Given that you have the slack webhook as a secret provided to the action and `slack_deploy` is true, the default `deploy`
 variable (to indicate all services) is true and deployment will happen. If you just want to test, then do:
 
 ```yaml
@@ -113,11 +113,9 @@ aren't necessarily new) then add test:
 
 If test is true, deploy will always be set to false.
 
-### Deploy to Twitter
+### Deploy to BlueSky
 
-To deploy to Twitter (in addiction to slack) you are required to set `deploy_twitter`
-to true, and also define all the needed environment variables in your repository
-secrets.
+To deploy to BlueSky, you should set `bluesky_deploy` to true, and also define all the needed environment variables in your repository secrets.
 
 ```yaml
 ...
@@ -127,15 +125,10 @@ secrets.
         with:
           filename: "_data/jobs.yaml"
           keys: "url,name"
-          test: false
-          slack_deploy: true
-
-          # Also deploy to Twitter (all secrets required in repository secrets)
-          twitter_deploy: true
-          twitter_api_secret: ${{ secrets.TWITTER_ACCESS_SECRET }}
-          twitter_api_key: ${{ secrets.TWITTER_ACCESS_TOKEN }}
-          twitter_consumer_secret: ${{ secrets.TWITTER_CONSUMER_API_SECRET }}
-          twitter_consumer_key: ${{ secrets.TWITTER_CONSUMER_API_KEY }}
+          test: false          
+          bluesky_deploy: true
+          bluesky_password: ${{ secrets.BLUESKY_PASSWORD }}
+          bluesky_email: ${{ secrets.BLUESKY_EMAIL }}
 ```
 
 ### Deploy to Mastodon
@@ -184,6 +177,30 @@ and then set `deploy_discord` to true, along with adding the webhook to your rep
           discord_webhook: ${{ secrets.DISCORD_WEBHOOK }}
 ```
 
+### Deploy to Twitter
+
+To deploy to Twitter (in addiction to slack) you are required to set `twitter_deploy`
+to true, and also define all the needed environment variables in your repository
+secrets.
+
+```yaml
+...
+      - id: updater
+        name: Job Updater
+        uses: rseng/jobs-updater@add/deploy-arg
+        with:
+          filename: "_data/jobs.yaml"
+          keys: "url,name"
+          test: false
+
+          # Deploy to Twitter (all secrets required in repository secrets)
+          twitter_deploy: true
+          twitter_api_secret: ${{ secrets.TWITTER_ACCESS_SECRET }}
+          twitter_api_key: ${{ secrets.TWITTER_ACCESS_TOKEN }}
+          twitter_consumer_secret: ${{ secrets.TWITTER_CONSUMER_API_SECRET }}
+          twitter_consumer_key: ${{ secrets.TWITTER_CONSUMER_API_KEY }}
+```
+
 ## Variables
 
 ### Inputs 
@@ -199,6 +216,9 @@ The following variables are available. You can also look at the [action.yml](act
 | hashtag | A hashtag to use (defaults to `#Rseng`) | false | #RSEng |
 | test |  Test the updater (ensure there are jobs) | true | false |
 | deploy | Global deploy across any service set to true? | true | true |
+| bluesky_deploy | Deploy to BlueSky? | true | false |
+| bluesky_email | BlueSky email | false | unset |
+| bluesky_password | BlueSky password | false | unset |
 | slack_deploy | Deploy to Slack? | true | false |
 | slack_webhook | Slack webhook to deploy to. | false | unset |
 | discord_deploy | Deploy to Discord? | true | false |
