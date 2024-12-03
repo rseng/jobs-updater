@@ -282,7 +282,7 @@ def deploy_slack(webhook, message):
         )
 
 
-def deploy_bluesky(client, entry, hashtag):
+def deploy_bluesky(client, entry, keys, hashtag):
     """
     Deploy to bluesky. We add the job link separately.
     """
@@ -433,7 +433,7 @@ def main():
             deploy_twitter(twitter_client, newline_message)
 
         if args.deploy_bluesky and bluesky_client:
-            deploy_bluesky(bluesky_client, entry, args.hashtag)
+            deploy_bluesky(bluesky_client, entry, keys, args.hashtag)
 
         # If we are instructed to deploy to mastodon and have a client
         if args.deploy_mastodon and mastodon_client:
