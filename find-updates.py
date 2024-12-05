@@ -297,7 +297,7 @@ def deploy_bluesky(client, entry, keys, hashtag):
     # Add the text to the textbuilder
     tb.text(message)
     tb.link(entry["title"], entry["url"])
-    tb.text(post)
+    tb.text("\n" + post)
     response = client.send_post(tb)
     print(f"Posted to bluesky {response.uri}: {response.cid}")
 
