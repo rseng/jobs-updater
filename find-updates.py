@@ -259,7 +259,7 @@ def prepare_post(entry, keys, without_url=False):
     for key in keys:
         if key in entry:
             # For BlueSky, we include the url separately with the title
-            if key in ["url", "title"] and without_url:
+            if key in ["url", "title", "name"] and without_url:
                 continue
             if key == "url":
                 post = post + entry[key] + "\n"
@@ -296,7 +296,12 @@ def deploy_bluesky(client, entry, keys, hashtag):
 
     # Add the text to the textbuilder
     tb.text(message)
-    tb.link(entry["title"], entry["url"])
+    if "title" in entry.keys():
+        tb.link(entry["title"], entry["url"])
+    elif "name" in entry.keys():
+        tb.link(entry["name"], entry["url"])
+    else:
+        tb.link(entry["url"], entry["url"])
     tb.text("\n" + post)
     response = client.send_post(tb)
     print(f"Posted to bluesky {response.uri}: {response.cid}")
