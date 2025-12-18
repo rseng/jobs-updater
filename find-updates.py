@@ -296,7 +296,7 @@ def deploy_bluesky(client, entry, keys, hashtag):
 
     # Add the text to the textbuilder
     tb.text(message)
-    anchor=(entry.get('title') or entry.get('name') or entry.get('url')
+    anchor=entry.get('title') or entry.get('name') or entry.get('url')
     tb.link(anchor, entry.get('url'))
     tb.text("\n" + post)
     response = client.send_post(tb)
