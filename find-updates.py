@@ -296,12 +296,8 @@ def deploy_bluesky(client, entry, keys, hashtag):
 
     # Add the text to the textbuilder
     tb.text(message)
-    if "title" in entry.keys():
-        tb.link(entry["title"], entry["url"])
-    elif "name" in entry.keys():
-        tb.link(entry["name"], entry["url"])
-    else:
-        tb.link(entry["url"], entry["url"])
+    anchor=(entry.get('title') or entry.get('name') or entry.get('url')
+    tb.link(anchor, entry.get('url'))
     tb.text("\n" + post)
     response = client.send_post(tb)
     print(f"Posted to bluesky {response.uri}: {response.cid}")
