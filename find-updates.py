@@ -108,10 +108,10 @@ def get_parser():
     )
 
     update.add_argument(
-        "--hashtag",
-        dest="hashtag",
+        "--hashtags",
+        dest="hashtags",
         default="#RSEng",
-        help="A hashtag (starting with #) to include in the post, defaults to #RSEng",
+        help="A comma separated list of hashtags (starting with #) to include in the post, defaults to #RSEng",
     )
 
     update.add_argument(
@@ -282,7 +282,7 @@ def deploy_slack(webhook, message):
         )
 
 
-def deploy_bluesky(client, entry, keys, hashtag):
+def deploy_bluesky(client, entry, keys, hashtags):
     """
     Deploy to bluesky. We add the job link separately.
     """
@@ -291,11 +291,12 @@ def deploy_bluesky(client, entry, keys, hashtag):
     # Prepare the post, but without the url
     post = prepare_post(entry, keys, without_url=True)
     choice = random.choice(icons)
-    message = f"New {hashtag} Job! {choice}\n"
-    print(message)
-
     # Add the text to the textbuilder
-    tb.text(message)
+    # seems like a clumsy way to build such a message...
+    tb.text("New")
+    for hashtag in hashtags:
+        tb.text(" ").tag(hashtag, hashtag.strip("#")).text(" ")
+    tb.text(f"Job! {choice}\n")
     anchor=entry.get('title') or entry.get('name') or entry.get('url')
     tb.link(anchor, entry.get('url'))
     tb.text("\n" + post)
@@ -370,6 +371,9 @@ def main():
     # Parse keys into list
     keys = [x for x in args.keys.split(",") if x]
 
+    # Parse hashtags into list
+    hashtags = [x for x in args.hashtags.split(",") if x]
+
     # Find new posts in updated
     previous = set()
     missing_count = 0
@@ -410,8 +414,9 @@ def main():
         # Prepare the post
         post = prepare_post(entry, keys)
         choice = random.choice(icons)
-        message = f"New {args.hashtag} Job! {choice}: {post}"
-        newline_message = f"New {args.hashtag} Job! {choice}\n{post}"
+        tags=" ".join(x for x in hashtags)
+        message = f"New {tags} Job! {choice}: {post}"
+        newline_message = f"New {tags} Job! {choice}\n{post}"
         print(message)
 
         # Convert dates, etc. back to string
@@ -435,7 +440,7 @@ def main():
             deploy_twitter(twitter_client, newline_message)
 
         if args.deploy_bluesky and bluesky_client:
-            deploy_bluesky(bluesky_client, entry, keys, args.hashtag)
+            deploy_bluesky(bluesky_client, entry, keys, args.hashtags)
 
         # If we are instructed to deploy to mastodon and have a client
         if args.deploy_mastodon and mastodon_client:

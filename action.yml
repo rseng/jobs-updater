@@ -15,8 +15,8 @@ inputs:
     description: Field to use to determine uniqueness
     required: true
     default: url
-  hashtag:
-    description: A hashtag to use (defaults to <hashtag>Rseng)
+  hashtags:
+    description: A comma separated list of hashtags to use (defaults to <hashtag>Rseng)
     required: false
     default: "#RSEng"
   test:
@@ -117,7 +117,7 @@ runs:
         ACTION_DIR: ${{ github.action_path }}
         INPUT_REPO: ${{ github.repository }}
         INPUT_TEST: ${{ inputs.test }}
-        INPUT_HASHTAG: ${{ inputs.hashtag }}
+        INPUT_HASHTAGS: ${{ inputs.hashtags }}
         INPUT_DEPLOY: ${{ inputs.deploy }}
         SLACK_DEPLOY: ${{ inputs.slack_deploy }}
         SLACK_WEBHOOK: ${{ inputs.slack_webhook }}

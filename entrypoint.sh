@@ -85,13 +85,13 @@ printf " Deploy Discord: ${DEPLOY_DISCORD}\n"
 printf "   Deploy Slack: ${DEPLOY_SLACK}\n"
 printf "       Original: ${JOBFILE}\n"
 printf "        Updated: ${INPUT_FILENAME}\n"
-printf "        Hashtag: ${INPUT_HASHTAG}\n"
+printf "       Hashtags: ${INPUT_HASHTAGS}\n"
 printf "         Unique: ${INPUT_UNIQUE}\n"
 printf "           Keys: ${INPUT_KEYS}\n"
 printf "           Test: ${INPUT_TEST}\n"
 
 
-COMMAND="python ${ACTION_DIR}/find-updates.py update --keys ${INPUT_KEYS} --unique ${INPUT_UNIQUE} --original ${JOBFILE} --updated ${INPUT_FILENAME} --hashtag ${INPUT_HASHTAG}"
+COMMAND="python ${ACTION_DIR}/find-updates.py update --keys ${INPUT_KEYS} --unique ${INPUT_UNIQUE} --original ${JOBFILE} --updated ${INPUT_FILENAME} --hashtags ${INPUT_HASHTAGS}"
 
 if [[ "${DEPLOY}" == "true" ]]; then
     COMMAND="${COMMAND} --deploy"
