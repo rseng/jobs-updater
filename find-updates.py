@@ -440,7 +440,7 @@ def main():
             deploy_twitter(twitter_client, newline_message)
 
         if args.deploy_bluesky and bluesky_client:
-            deploy_bluesky(bluesky_client, entry, keys, args.hashtags)
+            deploy_bluesky(bluesky_client, entry, keys, hashtags)
 
         # If we are instructed to deploy to mastodon and have a client
         if args.deploy_mastodon and mastodon_client:
