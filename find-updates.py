@@ -108,8 +108,8 @@ def get_parser():
     )
 
     update.add_argument(
-        "--hashtags",
-        dest="hashtags",
+        "--hashtag",
+        dest="hashtag",
         default="#RSEng",
         help="A comma separated list of hashtags (starting with #) to include in the post, defaults to #RSEng",
     )
@@ -293,9 +293,9 @@ def deploy_bluesky(client, entry, keys, hashtags):
     choice = random.choice(icons)
     # Add the text to the textbuilder
     # seems like a clumsy way to build such a message...
-    tb.text("New")
+    tb.text("New ")
     for hashtag in hashtags:
-        tb.text(" ").tag(hashtag, hashtag.strip("#")).text(" ")
+        tb.tag(hashtag, hashtag.lstrip("#")).text(" ")
     tb.text(f"Job! {choice}\n")
     anchor=entry.get('title') or entry.get('name') or entry.get('url')
     tb.link(anchor, entry.get('url'))
@@ -372,7 +372,7 @@ def main():
     keys = [x for x in args.keys.split(",") if x]
 
     # Parse hashtags into list
-    hashtags = [x for x in args.hashtags.split(",") if x]
+    hashtags = [x for x in args.hashtag.split(",") if x]
 
     # Find new posts in updated
     previous = set()
@@ -414,9 +414,8 @@ def main():
         # Prepare the post
         post = prepare_post(entry, keys)
         choice = random.choice(icons)
-        tags=" ".join(x for x in hashtags)
-        message = f"New {tags} Job! {choice}: {post}"
-        newline_message = f"New {tags} Job! {choice}\n{post}"
+        message = f"New {(" ".join(hashtags))} Job! {choice}: {post}"
+        newline_message = f"New {(" ".join(hashtags))} Job! {choice}\n{post}"
         print(message)
 
         # Convert dates, etc. back to string
