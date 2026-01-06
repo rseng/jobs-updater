@@ -16,7 +16,7 @@ inputs:
     required: true
     default: url
   hashtag:
-    description: A hashtag to use (defaults to <hashtag>Rseng)
+    description: A comma separated list of hashtags to use (defaults to <hashtag>RSEng)
     required: false
     default: "#RSEng"
   test:

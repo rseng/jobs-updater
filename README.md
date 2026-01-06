@@ -213,7 +213,7 @@ The following variables are available. You can also look at the [action.yml](act
 | previous_filename | The previous filename (for manual tesing or running alongside update) | false | unset |
 | keys | Comma separated list of keys to post (defaults to url) | false | url |
 | unique | Field to use to determine uniqueness | true | url |
-| hashtag | A hashtag to use (defaults to `#Rseng`) | false | #RSEng |
+| hashtag | A comma separated list of hashtags to use (defaults to `#RSEng`) | false | #RSEng |
 | test |  Test the updater (ensure there are jobs) | true | false |
 | deploy | Global deploy across any service set to true? | true | true |
 | bluesky_deploy | Deploy to BlueSky? | true | false |
